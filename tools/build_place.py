@@ -73,6 +73,7 @@ def main():
            'xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">\n' + body + "</roblox>\n")
     with open(out, "w", encoding="utf-8") as handle:
         handle.write(xml)
+    import shutil; shutil.copy(out, os.path.join(ROOT, "docs", "BobuxObby.rbxlx"))
     print("Wrote %s (%d instances, %d KB)" % (out, counter[0], len(xml) // 1024))
 
 
