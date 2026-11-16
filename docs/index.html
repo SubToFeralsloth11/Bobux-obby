@@ -104,7 +104,7 @@
 
 <div id="title">
   <h1>BOBUX OBBY</h1>
-  <p>30 stages. 5 worlds. One epic climb.</p>
+  <p>55 stages. 5 worlds. One epic climb.</p>
   <button id="playBtn" class="btn">PLAY</button>
   <p id="hint">WASD + Space to play  ·  drag the mouse to look</p>
 </div>
@@ -143,7 +143,7 @@ const ZONES = [
   { name: 'Starlight Sanctum', tag: 'Almost there. Reach for the stars!', color: 0xbe96ff, sky: 0x070618, fog: 0x15123a, sun: 0xc4b8ff, amb: 0.8, far: 600 },
 ];
 
-const STAGES = [
+const FEATURES = [
   ['FirstSteps', 1, 'First Steps', 0, 'Jump from stone to stone!'],
   ['LadderCliffs', 1, 'Ladder Cliffs', 20, 'Walk into a ladder to climb it.'],
   ['SlidingStones', 1, 'Sliding Stones', -30, 'Moving blocks carry you along.'],
@@ -175,6 +175,48 @@ const STAGES = [
   ['PowerTrip', 5, 'Power Trip', 0, 'Every power-up, one after another!'],
   ['TheAscent', 5, 'The Ascent', -20, "The final climb. You've got this!"],
 ].map((s) => ({ key: s[0], zone: s[1], name: s[2], turn: s[3], tip: s[4] }));
+
+// 55 stages, 11 per zone. Each stage = a few procedural sections whose
+// difficulty d (0 -> 1) rises every stage, followed by one hand-made feature.
+const STAGE_COUNT = 55;
+const EXTRA_INFO = {
+  jumps: ['Stepping Stones', 'Mind the gaps!'],
+  kill: ['Kill Bricks', 'Hop over the glowing red bricks.'],
+  neo: ['Neo Jumps', 'Neo jump: swing around the edge of the wall!'],
+  slide: ['Sliders', 'Ride the sliding blocks across.'],
+  truss: ['Truss Jumps', 'Jump onto the ladder, climb, then leap off.'],
+  tiny: ['Tiny Tiles', 'Small tiles. Careful landings!'],
+  spin: ['Spin Strip', 'Jump the sweeping bar.'],
+  wrap: ['Wraparound', 'Two neo jumps in a row!'],
+};
+const STAGES = [];
+for (let i = 1; i <= STAGE_COUNT; i++) {
+  const zone = Math.ceil(i / 11), j = (i - 1) % 11, d = (i - 1) / (STAGE_COUNT - 1);
+  const feats = FEATURES.filter((f) => f.zone === zone), f = feats[j % feats.length];
+  const pool = ['jumps'];
+  if (d > 0.05) pool.push('kill');
+  if (d > 0.1) pool.push('slide');
+  if (d > 0.15) pool.push('neo');
+  if (d > 0.3) pool.push('tiny');
+  if (d > 0.35) pool.push('truss');
+  if (d > 0.45) pool.push('spin');
+  if (d > 0.6) pool.push('wrap');
+  const count = 1 + Math.round(d * 4), extras = [];
+  let h = i * 2654435761 % 4294967296;
+  for (let k = 0; k < count; k++) {
+    let pick;
+    do { h = (h * 1103515245 + 12345) % 2147483648; pick = pool[Math.floor(h / 65536) % pool.length]; } while (pool.length > 2 && (pick === extras[k - 1] || extras.filter((x) => x === pick).length >= 2));
+    extras.push(pick);
+  }
+  // a brand-new obstacle type is introduced right when it unlocks
+  const unlockAt = { kill: 0.05, slide: 0.1, neo: 0.15, tiny: 0.3, truss: 0.35, spin: 0.45, wrap: 0.6 };
+  const newest = pool[pool.length - 1], prevD = (i - 2) / (STAGE_COUNT - 1);
+  if (pool.length > 1 && prevD <= unlockAt[newest] && extras.indexOf(newest) < 0) extras[0] = newest;
+  const lead = EXTRA_INFO[extras[0]];
+  STAGES.push({ key: f.key, zone, d, extras, turn: f.turn,
+    name: j >= feats.length ? f.name + ' II' : f.name,
+    tip: extras.indexOf('neo') >= 0 || extras.indexOf('wrap') >= 0 ? EXTRA_INFO.neo[1] : (j % 2 ? lead[1] : f.tip) });
+}
 const FINISH = STAGES.length + 1;
 const zoneOf = (i) => (STAGES[i - 1] ? STAGES[i - 1].zone : ZONES.length);
 
@@ -396,7 +438,10 @@ function buildWorld() {
       this.trail = [];
       const radius = newZone || finish ? 13 : 8;
       const centre = this.w(0, 0, radius - 1);
-      const exitYaw = this.yaw + rad(info ? info.turn : 0);
+      let turn = info ? Math.abs(info.turn) : 0;
+      const heading = Math.atan2(Math.sin(this.yaw), Math.cos(this.yaw));
+      if (heading > 0.05) turn = -turn; else if (heading > -0.05 && index % 2) turn = -turn;
+      const exitYaw = this.yaw + rad(turn);
       this.push();
       this.p = centre;
       this.cyl(radius * 2, 1.7, 0, -0.65, 0, t.plaza);
@@ -786,10 +831,89 @@ function buildWorld() {
     },
   };
 
+  // ------------------------------------------------------------ procedural sections
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const P = {
+    jumps(d) {
+      const n = 4 + Math.round(d * 4);
+      for (let i = 0; i < n; i++) {
+        const size = lerp(6, 3, d) + rnd(-0.4, 0.4), gap = lerp(3.5, 5.6, d) + rnd(-0.4, 0.4);
+        const rise = rnd() < 0.5 ? rnd(0, lerp(1, 2.2, d)) : 0;
+        K.hop(gap - rise * 0.4, rise, size, size, { x: rnd(-1, 1) * lerp(1, 3, d) });
+        if (i % 2) K.coin(0, 3.5, -size / 2);
+      }
+      K.hop(3, 0, 5, 6);
+    },
+    kill(d) {
+      const n = 2 + Math.round(d * 4), gapK = lerp(9.5, 7.8, d), len = n * gapK + 4, wid = lerp(6, 3.5, d);
+      K.floor(len, wid, { stay: true });
+      for (let i = 0; i < n; i++) {
+        const z = 5 + i * gapK;
+        K.kill(wid, 0.4, lerp(0.8, 1.6, d), 0, 0.2, z);
+        if (d > 0.5 && i % 2) K.kill(0.6, 3, 0.6, (i % 4 === 1 ? -1 : 1) * (wid / 2 - 0.3), 1.5, z);
+      }
+      K.coinRow(2, 0, 3.5, 2, 0, 0, len - 4);
+      K.fwd(len);
+      K.hop(3, 0, 4, 6);
+    },
+    neo(d, side) {
+      side = side || (rnd() < 0.5 ? -1 : 1);
+      const wid = lerp(5, 3.4, d);
+      K.floor(5, wid);
+      const edge = lerp(0.4, wid / 2, d);
+      // a tall wall right after the ledge; go around its edge on the open side
+      K.block(14, 26, 1, -side * (7 - edge) , 2, 0.7, K.theme.body);
+      K.deco(0.3, 26, 1.1, side * edge, 2, 0.7, K.theme.accent, { neon: true });
+      K.hop(lerp(3, 3.6, d), 0, 5, wid);
+      K.coin(0, 3.5, -2.5);
+    },
+    wrap(d) { P.neo(d, 1); P.neo(d, -1); K.hop(3, 0, 5, 6); },
+    slide(d) {
+      K.floor(5, 6);
+      const n = 2 + Math.round(d * 2), per = lerp(5, 2.6, d), size = lerp(6, 4, d);
+      for (let i = 0; i < n; i++) {
+        K.fwd(3);
+        const dir = i % 2 ? 1 : -1;
+        K.mover(K.slab(size, size, dir * 6, 0, size / 2), -dir * 12, 0, 0, per, rnd());
+        K.fwd(size);
+      }
+      K.hop(3, 0, 5, 6);
+    },
+    truss(d) {
+      K.floor(5, 6);
+      const n = 1 + Math.round(d * 2);
+      for (let i = 0; i < n; i++) {
+        K.fwd(lerp(3, 4.5, d));
+        K.truss(12, 0, -6, 1);
+        K.coin(0, 8, 1);
+        K.move(0, 4, 2);
+        K.hop(lerp(3, 4.5, d), 0, lerp(5, 3.5, d), lerp(5, 3.5, d));
+      }
+      K.hop(3, 0, 5, 6);
+    },
+    tiny(d) {
+      const n = 5 + Math.round(d * 4);
+      for (let i = 0; i < n; i++) {
+        const size = lerp(3.4, 2.2, d);
+        K.hop(lerp(3, 4.2, d), i % 3 === 2 ? 1 : 0, size, size, { x: (i % 2 ? 1 : -1) * lerp(1, 2.6, d), bare: true });
+      }
+      K.hop(3, 0, 5, 6);
+    },
+    spin(d) {
+      K.floor(5, 8);
+      const n = 2 + Math.round(d * 2), len = n * 12 + 4;
+      K.floor(len, 8, { stay: true });
+      for (let i = 0; i < n; i++) K.spinner(8 + i * 12, 14, (i % 2 ? -1 : 1) * lerp(1.4, 2.6, d), { cross: d > 0.8 && i % 2 === 1 });
+      K.fwd(len);
+      K.hop(3, 0, 5, 6);
+    },
+  };
+
   let lastZone = 0;
   STAGES.forEach((stage) => {
     K.checkpoint();
     if (stage.zone !== lastZone) { lastZone = stage.zone; K.push(); D.backdrop(stage.zone); K.pop(); }
+    stage.extras.forEach((x) => P[x](stage.d));
     S[stage.key]();
     D.scatter(stage.zone);
   });

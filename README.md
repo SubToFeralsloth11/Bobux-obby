@@ -1,6 +1,6 @@
 # Bobux Obby
 
-A 3D obby you play in the browser: 30 stages across 5 themed zones, with checkpoints, ladders, moving blocks, temporary power-ups, coins and skins. Works with keyboard and mouse, touch (phones and tablets) and gamepad.
+A 3D obby you play in the browser: 55 stages across 5 themed zones that get harder as you climb, with neo jumps, kill bricks, truss jumps, checkpoints, ladders, moving blocks, temporary power-ups, coins and skins. Works with keyboard and mouse, touch (phones and tablets) and gamepad.
 
 **Play it:** https://subtoferalsloth11.github.io/Bobux-obby/
 
@@ -17,7 +17,7 @@ Controls: WASD/arrows + Space, drag the mouse to look, wheel to zoom, **R** resp
 
 ## Roblox version
 
-The repo also contains the same course as a Roblox place (`BobuxObby.rbxlx`, sources in `src/`). It has not been run in Roblox Studio.
+The repo also contains the original 30-stage course as a Roblox place (`BobuxObby.rbxlx`, sources in `src/`). It has not been run in Roblox Studio.
 
 ### Open it in Roblox Studio
 
