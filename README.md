@@ -1,8 +1,25 @@
 # Bobux Obby
 
-A 30-stage Roblox obby across 5 themed zones, with checkpoints, ladders, moving blocks, temporary power-ups, coins, a trail shop and a full HUD. Works with keyboard and mouse, touch (phones and tablets) and gamepad.
+A 3D obby you play in the browser: 30 stages across 5 themed zones, with checkpoints, ladders, moving blocks, temporary power-ups, coins and skins. Works with keyboard and mouse, touch (phones and tablets) and gamepad.
 
-## Play it in Roblox Studio
+**Play it:** https://subtoferalsloth11.github.io/Bobux-obby/
+
+**Play offline:** download `docs/index.html` and double-click it. It is one self-contained file, so it needs no server and no internet.
+
+## Browser game
+
+- `web/level.js` is the course: one short function per stage.
+- `web/game.js` is the engine: physics, camera, input, sound, saving and HUD.
+- `web/index.html` is the page and its styling.
+- After editing, run `python3 tools/build_web.py` to bundle everything (including three.js) into `docs/index.html`.
+
+Controls: WASD/arrows + Space, drag the mouse to look, wheel to zoom, **R** respawn, **M** stages, **T** skins, **P** settings. On touch: left thumb moves, drag elsewhere to look, JUMP button. Progress saves in the browser.
+
+## Roblox version
+
+The repo also contains the same course as a Roblox place (`BobuxObby.rbxlx`, sources in `src/`). It has not been run in Roblox Studio.
+
+### Open it in Roblox Studio
 
 1. Download **`BobuxObby.rbxlx`** from this repo.
 2. Open it in Roblox Studio (double-click it, or File > Open from File).
@@ -11,7 +28,7 @@ A 30-stage Roblox obby across 5 themed zones, with checkpoints, ladders, moving 
 
 Saving progress needs **Game Settings > Security > Enable Studio Access to API Services** (it is always on in a published game). Without it the game still works; progress just resets.
 
-## What's in it
+## What's in it (both versions)
 
 | Zone | Stages | Highlights |
 | --- | --- | --- |

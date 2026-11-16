@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Bobux Obby</title>
+<style>
+  :root { --panel:rgba(20,24,44,.9); --line:#080a16; --sub:#b0badc; --yellow:#ffd028; --green:#46dc78; --red:#ff4e60; --blue:#46aaff; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { margin:0; height:100%; overflow:hidden; background:#0d1024; color:#fff; font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif; font-weight:800;
+    user-select:none; -webkit-user-select:none; touch-action:none; }
+  #view { position:fixed; inset:0; width:100%; height:100%; display:block; touch-action:none; }
+  .hud { position:fixed; z-index:2; text-shadow:0 2px 0 var(--line); }
+  .pill { background:var(--panel); border:3px solid var(--line); border-radius:16px; }
+  #stage { top:max(8px,env(safe-area-inset-top)); left:50%; transform:translateX(-50%); width:min(380px,56vw); padding:7px 12px 9px 60px; min-height:56px; }
+  #badge { position:absolute; left:7px; top:6px; width:44px; height:44px; border-radius:50%; border:2px solid var(--line); display:grid; place-items:center; font-size:20px; }
+  #stageTitle { font-size:clamp(13px,2.2vw,19px); line-height:1.1; }
+  #stageName { font-size:clamp(10px,1.5vw,13px); color:var(--sub); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #track { height:6px; background:#242a4a; border-radius:3px; margin-top:4px; overflow:hidden; }
+  #fill { height:100%; width:0; border-radius:3px; transition:width .5s; }
+  #stats { top:max(8px,env(safe-area-inset-top)); left:max(10px,env(safe-area-inset-left)); display:flex; flex-direction:column; gap:6px; }
+  #stats .pill { padding:5px 12px; font-size:clamp(14px,2.2vw,19px); min-width:104px; }
+  #coins { color:var(--yellow); }
+  #side { left:max(10px,env(safe-area-inset-left)); top:calc(max(8px,env(safe-area-inset-top)) + 96px); display:flex; flex-direction:column; gap:7px; }
+  .round { width:clamp(42px,6.4vw,54px); height:clamp(42px,6.4vw,54px); border-radius:14px; border:3px solid var(--line); color:#fff; font-size:clamp(18px,3vw,24px);
+    position:relative; cursor:pointer; font-family:inherit; box-shadow:inset 0 -5px 0 rgba(0,0,0,.22); transition:transform .08s; }
+  .round:hover { transform:scale(1.07); } .round:active { transform:scale(.93); }
+  .round kbd { display:none; position:absolute; right:-6px; bottom:-6px; background:var(--line); border-radius:6px; font:800 11px/1 inherit; padding:3px 5px; }
+  .desktop .round kbd { display:block; }
+  #tray { left:50%; bottom:max(14px,env(safe-area-inset-bottom)); transform:translateX(-50%); display:flex; gap:8px; pointer-events:none; }
+  .tile { background:var(--panel); border:3px solid var(--line); border-radius:14px; padding:6px 10px; display:flex; gap:8px; align-items:center; font-size:13px; white-space:nowrap; }
+  .tile .ico { font-size:24px; } .bar { width:84px; height:8px; background:#242a4a; border-radius:4px; margin-top:4px; overflow:hidden; } .bar i { display:block; height:100%; width:100%; }
+  #toast { top:calc(max(8px,env(safe-area-inset-top)) + 74px); left:50%; transform:translateX(-50%) scale(.5); opacity:0; font-size:clamp(17px,3.2vw,30px); white-space:nowrap; pointer-events:none; }
+  #toast.show { animation:pop 1.9s both; }
+  @keyframes pop { 0%{transform:translateX(-50%) scale(.5);opacity:0} 12%{transform:translateX(-50%) scale(1.12);opacity:1} 20%{transform:translateX(-50%) scale(1)} 85%{opacity:1} 100%{opacity:0;transform:translateX(-50%) scale(1)} }
+  #zoneCard { top:26%; left:0; right:0; text-align:center; opacity:0; pointer-events:none; }
+  #zoneCard.show { animation:zone 3.4s both; }
+  @keyframes zone { 0%{opacity:0;transform:scale(.7)} 10%{opacity:1;transform:scale(1.04)} 16%{transform:scale(1)} 82%{opacity:1} 100%{opacity:0} }
+  #zoneSub { color:var(--sub); font-size:clamp(14px,2.4vw,22px); letter-spacing:.3em; }
+  #zoneTitle { font-size:clamp(34px,8vw,84px); line-height:1; -webkit-text-stroke:2px var(--line); }
+  #zoneTag { font-size:clamp(13px,2.2vw,22px); margin-top:8px; }
+  #flash { position:fixed; inset:0; background:var(--red); opacity:0; pointer-events:none; z-index:3; }
+  #flash.go { animation:flash .6s; } @keyframes flash { 0%{opacity:.5} 100%{opacity:0} }
+  #stick { position:fixed; width:120px; height:120px; border-radius:50%; background:rgba(255,255,255,.14); border:3px solid rgba(255,255,255,.4); display:none; z-index:2; pointer-events:none; }
+  #knob { position:absolute; left:35px; top:35px; width:50px; height:50px; border-radius:50%; background:rgba(255,255,255,.75); }
+  #jumpBtn { position:fixed; right:max(22px,env(safe-area-inset-right)); bottom:max(26px,env(safe-area-inset-bottom)); width:96px; height:96px; border-radius:50%; z-index:2;
+    background:rgba(70,220,120,.5); border:4px solid rgba(255,255,255,.7); color:#fff; font:800 18px inherit; touch-action:none; }
+  .desktop #jumpBtn { display:none; }
+  #modal { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:5; display:none; align-items:center; justify-content:center; padding:12px; touch-action:auto; }
+  #window { background:#141830; border:3px solid var(--line); border-radius:22px; width:min(600px,100%); max-height:min(480px,96vh); display:flex; flex-direction:column; padding:14px 18px 18px; animation:in .3s cubic-bezier(.3,1.5,.5,1); }
+  @keyframes in { from{transform:scale(.7);opacity:0} }
+  #window header { display:flex; justify-content:space-between; align-items:center; font-size:26px; margin-bottom:10px; }
+  .page { overflow-y:auto; flex:1; touch-action:pan-y; }
+  #page-stages { display:grid; grid-template-columns:repeat(auto-fill,minmax(76px,1fr)); gap:8px; }
+  #page-stages[style*="block"] { display:grid !important; }
+  .cell, .btn { border:3px solid var(--line); border-radius:14px; color:#fff; font:800 20px inherit; cursor:pointer; padding:14px 6px; box-shadow:inset 0 -5px 0 rgba(0,0,0,.22); text-shadow:0 2px 0 var(--line); transition:transform .08s; }
+  .cell:hover, .btn:hover { transform:scale(1.05); } .cell:active, .btn:active { transform:scale(.94); }
+  .btn { padding:12px 26px; } .btn.small { padding:8px 14px; font-size:15px; min-width:110px; }
+  .row { display:flex; align-items:center; gap:12px; background:#242a4a; border-radius:12px; padding:9px 12px; margin-bottom:8px; font-size:17px; }
+  .row b { flex:1; } .swatch { width:54px; height:30px; border-radius:8px; border:2px solid var(--line); }
+  .help { color:var(--sub); font-weight:600; font-size:14px; line-height:1.6; margin-top:14px; }
+  #title { position:fixed; inset:0; z-index:8; background:rgba(10,12,28,.55); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; text-align:center; padding:16px; transition:opacity .45s; }
+  #title.gone { opacity:0; pointer-events:none; }
+  #title h1 { margin:0; font-size:clamp(46px,13vw,130px); line-height:.95; background:linear-gradient(#ffd028,#ff7a3c); -webkit-background-clip:text; background-clip:text; color:transparent; filter:drop-shadow(0 5px 0 var(--line)); }
+  #title p { margin:0; color:var(--sub); font-size:clamp(13px,2.4vw,20px); }
+  #playBtn { background:var(--green); font-size:clamp(26px,5vw,40px); padding:16px 64px; margin:10px 0; animation:pulse 1.4s infinite ease-in-out; }
+  @keyframes pulse { 50%{transform:scale(1.07)} }
+  @media (max-height:430px) { #side { flex-direction:row; top:auto; bottom:calc(max(26px,env(safe-area-inset-bottom)) + 130px); left:auto; right:max(14px,env(safe-area-inset-right)); flex-wrap:wrap; width:106px; } }
+</style>
+</head>
+<body>
+<canvas id="view"></canvas>
+
+<div id="stage" class="hud pill"><div id="badge">1</div><div id="stageTitle">STAGE 1 / 30</div><div id="stageName"></div><div id="track"><div id="fill"></div></div></div>
+<div id="stats" class="hud"><div class="pill">🪙 <span id="coins">0</span></div><div class="pill">⏱ <span id="timer">0:00.0</span></div></div>
+<div id="side" class="hud">
+  <button id="bStages" class="round" style="background:#46aaff" title="Stages">🗺<kbd>M</kbd></button>
+  <button id="bSkins" class="round" style="background:#ff6ec8" title="Skins">👕<kbd>T</kbd></button>
+  <button id="bSettings" class="round" style="background:#343a66" title="Settings">⚙<kbd>P</kbd></button>
+  <button id="bReset" class="round" style="background:#ff4e60" title="Respawn">↺<kbd>R</kbd></button>
+</div>
+<div id="tray" class="hud"></div>
+<div id="toast" class="hud"></div>
+<div id="zoneCard" class="hud"><div id="zoneSub"></div><div id="zoneTitle"></div><div id="zoneTag"></div></div>
+<div id="flash"></div>
+<div id="stick"><div id="knob"></div></div>
+<button id="jumpBtn">JUMP</button>
+
+<div id="modal"><div id="window">
+  <header><span id="modalTitle">MENU</span><button id="closeBtn" class="round" style="background:#ff4e60">✕</button></header>
+  <div id="page-stages" class="page"></div>
+  <div id="page-skins" class="page"></div>
+  <div id="page-settings" class="page">
+    <div class="row"><b>Sound</b><button id="soundBtn" class="btn small" style="background:#46dc78">ON</button></div>
+    <div class="row"><b>Start a fresh run from Stage 1<br><small style="color:#b0badc;font-weight:600">Keeps your coins and skins</small></b><button id="restartBtn" class="btn small" style="background:#ff4e60">RESTART</button></div>
+    <div class="help"><b style="color:#fff">CONTROLS</b><br>Keyboard: WASD or arrows to move, Space to jump, drag the mouse to look, wheel to zoom, R to respawn<br>Touch: left thumb to move, drag anywhere else to look, JUMP button<br>Gamepad: left stick to move, right stick to look, A to jump</div>
+  </div>
+  <div id="page-win" class="page" style="text-align:center">
+    <div style="font-size:64px">🏆</div><div style="font-size:30px;color:#ffd028">YOU BEAT BOBUX OBBY!</div>
+    <div id="winTime" style="font-size:24px;margin-top:8px"></div><div id="winDetail" style="color:#b0badc;margin:6px 0 18px"></div>
+    <button id="againBtn" class="btn" style="background:#46dc78">PLAY AGAIN</button> <button id="keepBtn" class="btn" style="background:#46aaff">KEEP EXPLORING</button>
+  </div>
+</div></div>
+
+<div id="title">
+  <h1>BOBUX OBBY</h1>
+  <p>30 stages. 5 worlds. One epic climb.</p>
+  <button id="playBtn" class="btn">PLAY</button>
+  <p id="hint">WASD + Space to play  ·  drag the mouse to look</p>
+</div>
+
+<!--SCRIPTS-->
+</body>
+</html>
