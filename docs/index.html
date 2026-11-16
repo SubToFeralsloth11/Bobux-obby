@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bobux Obby</title>
+<style>
+  :root { --bg:#141830; --panel:#20264a; --text:#fff; --sub:#b0badc; --yellow:#ffd028; --green:#46dc78; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:linear-gradient(#1b2150,#0d1024) fixed; color:var(--text); font:17px/1.55 system-ui,sans-serif; }
+  main { max-width:860px; margin:0 auto; padding:32px 16px 56px; }
+  h1 { font-size:clamp(44px,11vw,92px); margin:16px 0 4px; line-height:1; text-align:center;
+       background:linear-gradient(#ffd028,#ff7a3c); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .tag { text-align:center; color:var(--sub); margin:0 0 28px; }
+  .cta { display:block; width:max-content; max-width:100%; margin:0 auto 32px; padding:16px 34px; border-radius:16px;
+         background:var(--green); color:#08210f; font-weight:800; font-size:20px; text-decoration:none; }
+  h2 { color:var(--yellow); margin:32px 0 10px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; }
+  .card { background:var(--panel); border-radius:14px; padding:14px 16px; border-left:6px solid var(--c,#fff); }
+  .card b { display:block; font-size:18px; }
+  .card span { color:var(--sub); font-size:15px; }
+  ol { padding-left:22px; } li { margin:6px 0; }
+  code { background:#0b0e20; padding:2px 6px; border-radius:6px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>BOBUX OBBY</h1>
+  <p class="tag">30 stages. 5 worlds. One epic climb. A Roblox obby for keyboard, mouse, touch and gamepad.</p>
+  <a class="cta" href="https://github.com/SubToFeralsloth11/Bobux-obby/raw/claude/roblox-obby-game-i8u756/BobuxObby.rbxlx">Download the Roblox place file</a>
+
+  <h2>How to play</h2>
+  <ol>
+    <li>Download <code>BobuxObby.rbxlx</code> with the button above.</li>
+    <li>Open it in Roblox Studio and press <b>Play</b>.</li>
+    <li>To share it, use <b>File &gt; Publish to Roblox</b>.</li>
+  </ol>
+  <p>Roblox games only run inside Roblox, so this page is the download and guide, not the game itself.</p>
+
+  <h2>The five zones</h2>
+  <div class="grid">
+    <div class="card" style="--c:#6edc5a"><b>Sunny Meadows</b><span>Stepping stones, ladders, sliding blocks, spinners</span></div>
+    <div class="card" style="--c:#ff7828"><b>Magma Caverns</b><span>Lava, crumbling tiles, fire jets, swinging blades</span></div>
+    <div class="card" style="--c:#82d7ff"><b>Frostbite Peaks</b><span>Ice, conveyors, bounce pads, crushers</span></div>
+    <div class="card" style="--c:#00f0e6"><b>Neon City</b><span>Laser grids, boost pads, a carousel</span></div>
+    <div class="card" style="--c:#be96ff"><b>Starlight Sanctum</b><span>Star wheel, phase tiles, the final spiral</span></div>
+  </div>
+
+  <h2>Power-ups</h2>
+  <div class="grid">
+    <div class="card" style="--c:#ffd028"><b>⚡ Turbo</b><span>Run super fast</span></div>
+    <div class="card" style="--c:#50e678"><b>🚀 Mega Jump</b><span>Leap over tall walls</span></div>
+    <div class="card" style="--c:#ff6edc"><b>✨ Double Jump</b><span>Jump again in mid-air</span></div>
+    <div class="card" style="--c:#96beff"><b>🌙 Moon Boots</b><span>Float through the air</span></div>
+    <div class="card" style="--c:#46dcff"><b>🛡 Shield</b><span>Hazards can't hurt you</span></div>
+  </div>
+
+  <h2>Controls</h2>
+  <p><b>Keyboard:</b> WASD or arrows to move, Space to jump, R to respawn, M for stages, T for trails, P for settings.<br>
+     <b>Touch:</b> thumbstick, jump button and the on-screen buttons.<br>
+     <b>Gamepad:</b> left stick to move, A to jump.</p>
+</main>
+</body>
+</html>

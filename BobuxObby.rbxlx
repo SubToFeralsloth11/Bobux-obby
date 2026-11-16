@@ -1,0 +1,5188 @@
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
+<Item class="Workspace" referent="RBX1"><Properties><string name="Name">Workspace</string><bool name="StreamingEnabled">false</bool></Properties></Item>
+<Item class="Players" referent="RBX2"><Properties><string name="Name">Players</string><bool name="CharacterAutoLoads">false</bool></Properties></Item>
+<Item class="Lighting" referent="RBX3"><Properties><string name="Name">Lighting</string><token name="Technology">4</token></Properties></Item>
+<Item class="ReplicatedStorage" referent="RBX7"><Properties><string name="Name">ReplicatedStorage</string></Properties><Item class="Folder" referent="RBX6"><Properties><string name="Name">Shared</string></Properties><Item class="ModuleScript" referent="RBX4"><Properties><string name="Name">Config</string><ProtectedString name="Source"><![CDATA[--[[
+	Config
+	Every tunable number, colour, name and asset id for Bobux Obby lives here.
+	Server and client both read this module, so changing a value in one place
+	changes it everywhere.
+]]
+
+local Config = {}
+
+local RGB = Color3.fromRGB
+
+Config.GameName = "BOBUX OBBY"
+Config.Tagline = "30 stages. 5 worlds. One epic climb."
+Config.DataStoreName = "BobuxObby_v1"
+
+----------------------------------------------------------------------
+-- Movement
+----------------------------------------------------------------------
+Config.Physics = {
+	WalkSpeed = 16,
+	JumpPower = 50,
+	RespawnTime = 1.1,
+	VoidMargin = 45, -- how far below a stage you can fall before respawning
+}
+
+----------------------------------------------------------------------
+-- Temporary power-ups
+----------------------------------------------------------------------
+Config.PowerUps = {
+	Speed = {
+		Name = "TURBO",
+		Icon = "⚡",
+		Desc = "Run super fast",
+		Duration = 8,
+		Color = RGB(255, 208, 40),
+		WalkSpeed = 30,
+	},
+	Jump = {
+		Name = "MEGA JUMP",
+		Icon = "🚀",
+		Desc = "Leap over tall walls",
+		Duration = 8,
+		Color = RGB(80, 230, 120),
+		JumpPower = 85,
+	},
+	DoubleJump = {
+		Name = "DOUBLE JUMP",
+		Icon = "✨",
+		Desc = "Jump again in mid-air",
+		Duration = 12,
+		Color = RGB(255, 110, 220),
+	},
+	Feather = {
+		Name = "MOON BOOTS",
+		Icon = "🌙",
+		Desc = "Float through the air",
+		Duration = 10,
+		Color = RGB(150, 190, 255),
+		GravityScale = 0.35,
+	},
+	Shield = {
+		Name = "SHIELD",
+		Icon = "🛡",
+		Desc = "Hazards can't hurt you",
+		Duration = 6,
+		Color = RGB(70, 220, 255),
+	},
+}
+Config.PowerUpOrder = { "Speed", "Jump", "DoubleJump", "Feather", "Shield" }
+Config.PickupRespawn = 3.5 -- seconds before a collected orb comes back (per player)
+
+----------------------------------------------------------------------
+-- Rewards
+----------------------------------------------------------------------
+Config.Rewards = {
+	Coin = 1,
+	Checkpoint = 5,
+	Win = 100,
+}
+
+----------------------------------------------------------------------
+-- Trails (cosmetics bought with coins)
+----------------------------------------------------------------------
+Config.Trails = {
+	{ Id = "None", Name = "No Trail", Price = 0 },
+	{ Id = "Spark", Name = "Spark", Price = 20, A = RGB(255, 240, 150), B = RGB(255, 170, 40) },
+	{ Id = "Meadow", Name = "Meadow", Price = 45, A = RGB(170, 255, 120), B = RGB(40, 190, 110) },
+	{ Id = "Ember", Name = "Ember", Price = 80, A = RGB(255, 200, 60), B = RGB(255, 50, 20) },
+	{ Id = "Frost", Name = "Frost", Price = 120, A = RGB(230, 250, 255), B = RGB(80, 170, 255) },
+	{ Id = "Neon", Name = "Neon", Price = 170, A = RGB(0, 255, 230), B = RGB(255, 0, 200) },
+	{ Id = "Galaxy", Name = "Galaxy", Price = 240, A = RGB(190, 120, 255), B = RGB(60, 40, 200) },
+	{ Id = "Rainbow", Name = "Rainbow", Price = 350, Rainbow = true },
+}
+
+----------------------------------------------------------------------
+-- Zones (worlds). Lighting values are tweened on the client when a
+-- player reaches a new zone.
+----------------------------------------------------------------------
+Config.Zones = {
+	{
+		Name = "Sunny Meadows",
+		Tagline = "Warm up those legs!",
+		Color = RGB(110, 220, 90),
+		Music = 1843404009, -- "Happy Song"
+		Particles = "Pollen",
+		Lighting = {
+			ClockTime = 14,
+			Brightness = 3,
+			Ambient = RGB(92, 96, 110),
+			OutdoorAmbient = RGB(150, 155, 165),
+			ColorShift_Top = RGB(255, 240, 215),
+			ExposureCompensation = 0.1,
+		},
+		Atmosphere = {
+			Density = 0.3,
+			Offset = 0.25,
+			Color = RGB(205, 225, 255),
+			Decay = RGB(120, 150, 190),
+			Glare = 0.25,
+			Haze = 1.3,
+		},
+		Color_Correction = { TintColor = RGB(255, 252, 244), Saturation = 0.18, Contrast = 0.06, Brightness = 0.02 },
+		Bloom = { Intensity = 0.55, Size = 26, Threshold = 1.5 },
+		Clouds = { Cover = 0.58, Density = 0.6, Color = RGB(255, 255, 255) },
+	},
+	{
+		Name = "Magma Caverns",
+		Tagline = "The floor is lava. Literally.",
+		Color = RGB(255, 120, 40),
+		Music = 1845149698, -- "Seek & Destroy"
+		Particles = "Embers",
+		Lighting = {
+			ClockTime = 18.6,
+			Brightness = 1.6,
+			Ambient = RGB(88, 44, 36),
+			OutdoorAmbient = RGB(120, 62, 48),
+			ColorShift_Top = RGB(255, 150, 90),
+			ExposureCompensation = 0.05,
+		},
+		Atmosphere = {
+			Density = 0.42,
+			Offset = 0.1,
+			Color = RGB(150, 62, 36),
+			Decay = RGB(70, 22, 12),
+			Glare = 0.1,
+			Haze = 2.4,
+		},
+		Color_Correction = { TintColor = RGB(255, 232, 216), Saturation = 0.12, Contrast = 0.14, Brightness = 0 },
+		Bloom = { Intensity = 1, Size = 30, Threshold = 1.1 },
+		Clouds = { Cover = 0.72, Density = 0.8, Color = RGB(90, 50, 44) },
+	},
+	{
+		Name = "Frostbite Peaks",
+		Tagline = "Careful... it's slippery up here.",
+		Color = RGB(130, 215, 255),
+		Music = 1841460294, -- "Celestial Aurora"
+		Particles = "Snow",
+		Lighting = {
+			ClockTime = 10.3,
+			Brightness = 2.6,
+			Ambient = RGB(120, 136, 160),
+			OutdoorAmbient = RGB(160, 176, 200),
+			ColorShift_Top = RGB(220, 238, 255),
+			ExposureCompensation = 0.12,
+		},
+		Atmosphere = {
+			Density = 0.36,
+			Offset = 0.3,
+			Color = RGB(220, 236, 255),
+			Decay = RGB(160, 190, 230),
+			Glare = 0.2,
+			Haze = 1.9,
+		},
+		Color_Correction = { TintColor = RGB(232, 244, 255), Saturation = -0.04, Contrast = 0.05, Brightness = 0.02 },
+		Bloom = { Intensity = 0.6, Size = 26, Threshold = 1.4 },
+		Clouds = { Cover = 0.7, Density = 0.5, Color = RGB(240, 246, 255) },
+	},
+	{
+		Name = "Neon City",
+		Tagline = "Lights on. Lasers on. Good luck.",
+		Color = RGB(0, 240, 230),
+		Music = 1842976958, -- "Arcade Weekend"
+		Particles = "Glitch",
+		Lighting = {
+			ClockTime = 0,
+			Brightness = 1.2,
+			Ambient = RGB(58, 46, 100),
+			OutdoorAmbient = RGB(74, 62, 130),
+			ColorShift_Top = RGB(150, 120, 255),
+			ExposureCompensation = 0.25,
+		},
+		Atmosphere = {
+			Density = 0.3,
+			Offset = 0.1,
+			Color = RGB(70, 36, 120),
+			Decay = RGB(24, 12, 56),
+			Glare = 0,
+			Haze = 1.4,
+		},
+		Color_Correction = { TintColor = RGB(238, 228, 255), Saturation = 0.28, Contrast = 0.16, Brightness = 0.02 },
+		Bloom = { Intensity = 1.3, Size = 32, Threshold = 0.9 },
+		Clouds = { Cover = 0.35, Density = 0.4, Color = RGB(60, 40, 110) },
+	},
+	{
+		Name = "Starlight Sanctum",
+		Tagline = "Almost there. Reach for the stars!",
+		Color = RGB(190, 150, 255),
+		Music = 9045934037, -- "The Night Sky - Underscore"
+		Particles = "Stars",
+		Lighting = {
+			ClockTime = 2.4,
+			Brightness = 1.4,
+			Ambient = RGB(60, 62, 112),
+			OutdoorAmbient = RGB(84, 88, 150),
+			ColorShift_Top = RGB(190, 180, 255),
+			ExposureCompensation = 0.3,
+		},
+		Atmosphere = {
+			Density = 0.14,
+			Offset = 0,
+			Color = RGB(46, 44, 96),
+			Decay = RGB(14, 12, 40),
+			Glare = 0,
+			Haze = 0.4,
+		},
+		Color_Correction = { TintColor = RGB(240, 236, 255), Saturation = 0.22, Contrast = 0.12, Brightness = 0.02 },
+		Bloom = { Intensity = 1.1, Size = 30, Threshold = 1 },
+		Clouds = { Cover = 0.2, Density = 0.3, Color = RGB(70, 60, 130) },
+	},
+}
+
+----------------------------------------------------------------------
+-- Stages. Stage N is the stretch of obby between checkpoint N and
+-- checkpoint N + 1. "Turn" bends the course (in degrees, + is right)
+-- at the checkpoint where the stage begins.
+----------------------------------------------------------------------
+Config.Stages = {
+	-- Zone 1 · Sunny Meadows
+	{ Zone = 1, Key = "FirstSteps", Name = "First Steps", Turn = 0, Tip = "Jump from stone to stone!" },
+	{ Zone = 1, Key = "LadderCliffs", Name = "Ladder Cliffs", Turn = 20, Tip = "Walk into a ladder to climb it." },
+	{ Zone = 1, Key = "SlidingStones", Name = "Sliding Stones", Turn = -30, Tip = "Moving blocks carry you along." },
+	{ Zone = 1, Key = "TurboRunway", Name = "Turbo Runway", Turn = 0, Tip = "Grab the ⚡ and clear the big gaps!" },
+	{ Zone = 1, Key = "SpinCycle", Name = "Spin Cycle", Turn = 30, Tip = "Hop over the spinning bars." },
+	{ Zone = 1, Key = "SkylineBeams", Name = "Skyline Beams", Turn = -20, Tip = "Keep your balance!" },
+	-- Zone 2 · Magma Caverns
+	{ Zone = 2, Key = "HotFeet", Name = "Hot Feet", Turn = 60, Tip = "Don't touch the lava." },
+	{ Zone = 2, Key = "CrumbleBridge", Name = "Crumble Bridge", Turn = -25, Tip = "Cracked tiles fall. Keep moving!" },
+	{ Zone = 2, Key = "MegaJumpCliffs", Name = "Mega Jump Cliffs", Turn = 0, Tip = "The 🚀 lets you jump HUGE walls." },
+	{ Zone = 2, Key = "FireJets", Name = "Fire Jets", Turn = 25, Tip = "Run when the flames go out." },
+	{ Zone = 2, Key = "LavaFerry", Name = "Lava Ferry", Turn = 0, Tip = "Ride the ferry. Dodge everything red." },
+	{ Zone = 2, Key = "PendulumPass", Name = "Pendulum Pass", Turn = -25, Tip = "Time your run between the blades." },
+	-- Zone 3 · Frostbite Peaks
+	{ Zone = 3, Key = "SlipNSlide", Name = "Slip 'n Slide", Turn = -60, Tip = "Ice is slippery. Brake early!" },
+	{ Zone = 3, Key = "ConveyorChaos", Name = "Conveyor Chaos", Turn = 20, Tip = "The arrows show where belts push you." },
+	{ Zone = 3, Key = "IcicleGauntlet", Name = "Icicle Gauntlet", Turn = 0, Tip = "Grab the 🛡 and sprint through!" },
+	{ Zone = 3, Key = "BouncyGlaciers", Name = "Bouncy Glaciers", Turn = -20, Tip = "Bounce pads launch you sky high." },
+	{ Zone = 3, Key = "CrusherHall", Name = "Crusher Hall", Turn = 0, Tip = "Wait for the crusher to rise." },
+	{ Zone = 3, Key = "SpikeballAlley", Name = "Spikeball Alley", Turn = 20, Tip = "Watch both sides!" },
+	-- Zone 4 · Neon City
+	{ Zone = 4, Key = "LaserGrid", Name = "Laser Grid", Turn = -60, Tip = "Jump low lasers. Never jump under high ones." },
+	{ Zone = 4, Key = "BoostBoulevard", Name = "Boost Boulevard", Turn = -20, Tip = "Hit the boost pad, then jump late." },
+	{ Zone = 4, Key = "Carousel", Name = "Carousel", Turn = 0, Tip = "Ride the ring halfway round." },
+	{ Zone = 4, Key = "DoubleTrouble", Name = "Double Trouble", Turn = 20, Tip = "With ✨ press jump again in mid-air." },
+	{ Zone = 4, Key = "LadderLasers", Name = "Ladder Lasers", Turn = 0, Tip = "Climb between the laser pulses." },
+	{ Zone = 4, Key = "NeonRush", Name = "Neon Rush", Turn = 25, Tip = "Line up the sliders, then go!" },
+	-- Zone 5 · Starlight Sanctum
+	{ Zone = 5, Key = "MoonBoots", Name = "Moon Boots", Turn = 60, Tip = "The 🌙 makes you floaty. Jump far!" },
+	{ Zone = 5, Key = "StarWheel", Name = "Star Wheel", Turn = -20, Tip = "Ride the wheel over the top." },
+	{ Zone = 5, Key = "PhaseTiles", Name = "Phase Tiles", Turn = 0, Tip = "Tiles flicker before they vanish." },
+	{ Zone = 5, Key = "SpinnerGauntlet", Name = "Spinner Gauntlet", Turn = 20, Tip = "Low bar: jump. High bar: stay down." },
+	{ Zone = 5, Key = "PowerTrip", Name = "Power Trip", Turn = 0, Tip = "Every power-up, one after another!" },
+	{ Zone = 5, Key = "TheAscent", Name = "The Ascent", Turn = -20, Tip = "The final climb. You've got this!" },
+}
+
+Config.StageCount = #Config.Stages -- playable stages
+Config.FinishIndex = Config.StageCount + 1 -- the last checkpoint is the finish line
+
+-- Zone a checkpoint index belongs to (the finish counts as the last zone).
+function Config.zoneOf(stageIndex)
+	local stage = Config.Stages[stageIndex]
+	if stage then
+		return stage.Zone
+	end
+	if stageIndex >= Config.FinishIndex then
+		return #Config.Zones
+	end
+	return 1
+end
+
+----------------------------------------------------------------------
+-- Audio. All ids were checked against the Roblox Creator Store and are
+-- published by Roblox / APM Music, so they are free to use in any
+-- experience. Swap them for your own if you like.
+----------------------------------------------------------------------
+Config.Audio = {
+	MusicVolume = 0.32,
+	SfxVolume = 0.6,
+	Music = {
+		Title = 1845756489, -- "Town Talk"
+		Win = 1839902860, -- "Victory Fanfare (b)"
+	},
+	Sfx = {
+		Click = { Id = 15675059323, Volume = 0.7 },
+		Hover = { Id = 15675032796, Volume = 0.35 },
+		Open = { Id = 15675024286, Volume = 0.6 },
+		Close = { Id = 15675028888, Volume = 0.5 },
+		Pop = { Id = 15675055424, Volume = 0.7 },
+		Error = { Id = 15675075163, Volume = 0.6 },
+		Checkpoint = { Id = 17208361335, Volume = 0.9 },
+		Coin = { Id = 17208319162, Volume = 0.55 },
+		Buy = { Id = 127645268874265, Volume = 0.8 },
+		PowerUp = { Id = 15675043410, Volume = 0.9 },
+		PowerDown = { Id = 15675062723, Volume = 0.6 },
+		Zone = { Id = 15675046931, Volume = 0.9 },
+		Death = { Id = 12222046, Volume = 0.55 },
+		Bounce = { Id = 12222124, Volume = 0.7 },
+		DoubleJump = { Id = 12222200, Volume = 0.7 },
+		Crumble = { Id = 12222140, Volume = 0.5 },
+		Shield = { Id = 12221990, Volume = 0.5 },
+		Win = { Id = 12222253, Volume = 0.9 },
+		Fanfare = { Id = 1836473422, Volume = 0.8 },
+	},
+}
+
+----------------------------------------------------------------------
+-- UI palette
+----------------------------------------------------------------------
+Config.UI = {
+	Font = Enum.Font.FredokaOne,
+	FontBody = Enum.Font.GothamBold,
+	Panel = RGB(20, 24, 44),
+	PanelLight = RGB(36, 42, 74),
+	Stroke = RGB(8, 10, 22),
+	Text = RGB(255, 255, 255),
+	SubText = RGB(176, 186, 220),
+	Yellow = RGB(255, 208, 40),
+	Green = RGB(70, 220, 120),
+	Red = RGB(255, 78, 96),
+	Blue = RGB(70, 170, 255),
+	Pink = RGB(255, 110, 200),
+	Locked = RGB(70, 76, 104),
+}
+
+return Config
+]]></ProtectedString></Properties></Item>
+<Item class="ModuleScript" referent="RBX5"><Properties><string name="Name">Util</string><ProtectedString name="Source"><![CDATA[--[[
+	Util
+	Small helpers shared by the server and the client.
+]]
+
+local TweenService = game:GetService("TweenService")
+
+local Util = {}
+
+-- Create an instance, set its properties, then parent it.
+function Util.make(className, props, parent)
+	local inst = Instance.new(className)
+	if props then
+		for key, value in pairs(props) do
+			inst[key] = value
+		end
+	end
+	if parent then
+		inst.Parent = parent
+	end
+	return inst
+end
+
+-- Play a tween and return it.
+function Util.tween(inst, duration, goal, style, direction, delayTime)
+	local info = TweenInfo.new(
+		duration,
+		style or Enum.EasingStyle.Quad,
+		direction or Enum.EasingDirection.Out,
+		0,
+		false,
+		delayTime or 0
+	)
+	local tween = TweenService:Create(inst, info, goal)
+	tween:Play()
+	return tween
+end
+
+-- 83.42 -> "1:23.4"
+function Util.formatTime(seconds)
+	if seconds == nil or seconds < 0 then
+		seconds = 0
+	end
+	local minutes = math.floor(seconds / 60)
+	local rest = seconds - minutes * 60
+	local whole = math.floor(rest)
+	local tenths = math.floor((rest - whole) * 10)
+	return string.format("%d:%02d.%d", minutes, whole, tenths)
+end
+
+-- 12345 -> "12,345"
+function Util.formatNumber(n)
+	local s = tostring(math.floor(n + 0.5))
+	local out = ""
+	while #s > 3 do
+		out = "," .. string.sub(s, -3) .. out
+		s = string.sub(s, 1, -4)
+	end
+	return s .. out
+end
+
+function Util.lerp(a, b, t)
+	return a + (b - a) * t
+end
+
+return Util
+]]></ProtectedString></Properties></Item>
+</Item>
+</Item>
+<Item class="ServerScriptService" referent="RBX21"><Properties><string name="Name">ServerScriptService</string></Properties><Item class="Folder" referent="RBX20"><Properties><string name="Name">Server</string></Properties><Item class="ModuleScript" referent="RBX8"><Properties><string name="Name">Game</string><ProtectedString name="Source"><![CDATA[--[[
+	Game
+	Server rules: spawning, checkpoints, coins, power-up validation, trails,
+	stage teleporting, winning and saving.
+
+	Player state is exposed to clients through attributes on the Player:
+	Stage, MaxStage, Coins, Wins, BestTime, RunStart, RunTime, Finished,
+	CoinMask, Trail, OwnedTrails.
+]]
+
+local CollectionService = game:GetService("CollectionService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local StarterPlayer = game:GetService("StarterPlayer")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local PlayerData = require(script.Parent.PlayerData)
+
+local Game = {}
+
+local world = nil
+local sessions = {} -- [Player] = { data, loaded, runStart, lastTeleport, pickups, dirty }
+local remotes = {}
+
+local function now()
+	return workspace:GetServerTimeNow()
+end
+
+local function makeRemote(name)
+	local remote = Instance.new("RemoteEvent")
+	remote.Name = name
+	remote.Parent = remotes.Folder
+	remotes[name] = remote
+	return remote
+end
+
+----------------------------------------------------------------------
+-- Replicated state
+----------------------------------------------------------------------
+
+local function coinMask(data)
+	local owned = {}
+	for _, id in ipairs(data.CoinIds) do
+		owned[id] = true
+	end
+	local chars = {}
+	for i = 1, world.CoinCount do
+		chars[i] = owned[i] and "1" or "0"
+	end
+	return table.concat(chars)
+end
+
+local function publish(player)
+	local session = sessions[player]
+	if not session then
+		return
+	end
+	local data = session.data
+	player:SetAttribute("Stage", data.Stage)
+	player:SetAttribute("MaxStage", data.MaxStage)
+	player:SetAttribute("Coins", data.Coins)
+	player:SetAttribute("Wins", data.Wins)
+	player:SetAttribute("BestTime", data.BestTime)
+	player:SetAttribute("Finished", data.Finished)
+	player:SetAttribute("RunStart", session.runStart)
+	player:SetAttribute("RunTime", data.Elapsed)
+	player:SetAttribute("Trail", data.Trail)
+	player:SetAttribute("OwnedTrails", table.concat(data.Trails, ","))
+	local stats = player:FindFirstChild("leaderstats")
+	if stats then
+		stats.Stage.Value = math.min(data.MaxStage, Config.StageCount)
+		stats.Coins.Value = data.Coins
+		stats.Wins.Value = data.Wins
+	end
+	session.dirty = true
+end
+
+----------------------------------------------------------------------
+-- Characters
+----------------------------------------------------------------------
+
+local function applyTrail(player, character)
+	local session = sessions[player]
+	local root = character:FindFirstChild("HumanoidRootPart")
+	if not session or not root then
+		return
+	end
+	local old = root:FindFirstChild("ObbyTrail")
+	if old then
+		old:Destroy()
+	end
+	local info = nil
+	for _, trail in ipairs(Config.Trails) do
+		if trail.Id == session.data.Trail then
+			info = trail
+		end
+	end
+	if not info or info.Id == "None" then
+		return
+	end
+	local a0 = root:FindFirstChild("TrailTop") or Instance.new("Attachment")
+	a0.Name = "TrailTop"
+	a0.Position = Vector3.new(0, 0.9, 0)
+	a0.Parent = root
+	local a1 = root:FindFirstChild("TrailBottom") or Instance.new("Attachment")
+	a1.Name = "TrailBottom"
+	a1.Position = Vector3.new(0, -0.9, 0)
+	a1.Parent = root
+	local trail = Instance.new("Trail")
+	trail.Name = "ObbyTrail"
+	trail.Attachment0 = a0
+	trail.Attachment1 = a1
+	trail.Lifetime = 0.7
+	trail.LightEmission = 1
+	trail.FaceCamera = true
+	trail.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.1), NumberSequenceKeypoint.new(1, 1) })
+	trail.WidthScale = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(1, 0.2) })
+	if info.Rainbow then
+		local points = {}
+		for i = 0, 6 do
+			points[i + 1] = ColorSequenceKeypoint.new(i / 6, Color3.fromHSV(i / 6.001, 0.9, 1))
+		end
+		trail.Color = ColorSequence.new(points)
+	else
+		trail.Color = ColorSequence.new(info.A, info.B)
+	end
+	trail.Parent = root
+end
+
+local function spawnPlayer(player)
+	local session = sessions[player]
+	if not session or player.Parent ~= Players then
+		return
+	end
+	local checkpoint = world.Checkpoints[session.data.Stage] or world.Checkpoints[1]
+	player.RespawnLocation = checkpoint.Spawn
+	session.spawning = true
+	local ok = pcall(function()
+		player:LoadCharacter()
+	end)
+	session.spawning = false
+	if not ok then
+		return
+	end
+	-- safety net: make sure the character really is on its checkpoint
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	if root and (root.Position - checkpoint.Spawn.Position).Magnitude > 20 then
+		character:PivotTo(checkpoint.Spawn.CFrame + Vector3.new(0, 4, 0))
+	end
+end
+
+local function onCharacter(player, character)
+	local humanoid = character:WaitForChild("Humanoid", 10)
+	if not humanoid then
+		return
+	end
+	humanoid.UseJumpPower = true
+	humanoid.WalkSpeed = Config.Physics.WalkSpeed
+	humanoid.JumpPower = Config.Physics.JumpPower
+	character:WaitForChild("HumanoidRootPart", 10)
+	applyTrail(player, character)
+	humanoid.Died:Connect(function()
+		task.wait(Config.Physics.RespawnTime)
+		if player.Character == character then
+			spawnPlayer(player)
+		end
+	end)
+end
+
+----------------------------------------------------------------------
+-- Checkpoints
+----------------------------------------------------------------------
+
+local function reachCheckpoint(player, index)
+	local session = sessions[player]
+	if not session then
+		return
+	end
+	local data = session.data
+	if index <= data.Stage or index > data.MaxStage + 1 then
+		return
+	end
+	data.Stage = index
+	player.RespawnLocation = world.Checkpoints[index].Spawn
+	local isNew = index > data.MaxStage
+	local reward = 0
+	if isNew then
+		data.MaxStage = index
+		reward = Config.Rewards.Checkpoint
+	end
+	if index == Config.FinishIndex and not data.Finished then
+		data.Finished = true
+		data.Elapsed = now() - session.runStart
+		data.Wins = data.Wins + 1
+		reward = reward + Config.Rewards.Win
+		local best = false
+		if data.BestTime <= 0 or data.Elapsed < data.BestTime then
+			data.BestTime = data.Elapsed
+			best = true
+		end
+		data.Coins = data.Coins + reward
+		publish(player)
+		remotes.Notify:FireClient(player, "Win", { Time = data.Elapsed, Best = best, Reward = reward })
+		return
+	end
+	data.Coins = data.Coins + reward
+	publish(player)
+	remotes.Notify:FireClient(player, "Checkpoint", { Stage = index, New = isNew, Reward = reward })
+end
+
+----------------------------------------------------------------------
+-- Remote handlers
+----------------------------------------------------------------------
+
+local function characterRoot(player)
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	if humanoid and root and humanoid.Health > 0 then
+		return root, humanoid, character
+	end
+	return nil
+end
+
+local function onDied(player)
+	local _, humanoid = characterRoot(player)
+	if humanoid then
+		humanoid.Health = 0
+	end
+end
+
+local function onCollect(player, part)
+	local session = sessions[player]
+	local root = characterRoot(player)
+	if not session or not root or typeof(part) ~= "Instance" or not part:IsA("BasePart") then
+		return
+	end
+	if not part:IsDescendantOf(world.Root) then
+		return
+	end
+	if CollectionService:HasTag(part, "Coin") then
+		local id = part:GetAttribute("Id")
+		if type(id) ~= "number" or (root.Position - part.Position).Magnitude > 30 then
+			return
+		end
+		if session.coins[id] then
+			return
+		end
+		session.coins[id] = true
+		table.insert(session.data.CoinIds, id)
+		session.data.Coins = session.data.Coins + Config.Rewards.Coin
+		player:SetAttribute("CoinMask", coinMask(session.data))
+		publish(player)
+	elseif CollectionService:HasTag(part, "PowerUp") then
+		-- Effects are simulated by the client that owns the character; the
+		-- server records them so everyone else can see the glow.
+		local kind = part:GetAttribute("Kind")
+		local cfg = Config.PowerUps[kind]
+		if not cfg then
+			return
+		end
+		local duration = part:GetAttribute("Duration") or cfg.Duration
+		player:SetAttribute("PU_" .. kind, now() + duration)
+		if kind == "Shield" then
+			local _, _, character = characterRoot(player)
+			local old = character:FindFirstChild("ObbyShield")
+			if old then
+				old:Destroy()
+			end
+			local field = Instance.new("ForceField")
+			field.Name = "ObbyShield"
+			field.Visible = true
+			field.Parent = character
+			task.delay(duration, function()
+				if field.Parent then
+					field:Destroy()
+				end
+			end)
+		end
+	end
+end
+
+local function onTeleport(player, index)
+	local session = sessions[player]
+	if not session or type(index) ~= "number" then
+		return
+	end
+	index = math.floor(index)
+	if index < 1 or index > session.data.MaxStage or not world.Checkpoints[index] then
+		return
+	end
+	if now() - session.lastTeleport < 1 then
+		return
+	end
+	session.lastTeleport = now()
+	session.data.Stage = index
+	publish(player)
+	spawnPlayer(player)
+end
+
+local function onRestart(player)
+	local session = sessions[player]
+	if not session or now() - session.lastTeleport < 1 then
+		return
+	end
+	session.lastTeleport = now()
+	local data = session.data
+	data.Stage = 1
+	data.MaxStage = 1
+	data.Finished = false
+	data.Elapsed = 0
+	data.CoinIds = {}
+	session.coins = {}
+	session.runStart = now()
+	player:SetAttribute("CoinMask", coinMask(data))
+	publish(player)
+	spawnPlayer(player)
+end
+
+local function onShop(player, action, id)
+	local session = sessions[player]
+	if not session or type(id) ~= "string" then
+		return
+	end
+	local info = nil
+	for _, trail in ipairs(Config.Trails) do
+		if trail.Id == id then
+			info = trail
+		end
+	end
+	if not info then
+		return
+	end
+	local data = session.data
+	local owned = table.find(data.Trails, id) ~= nil
+	if action == "Buy" and not owned then
+		if data.Coins < info.Price then
+			remotes.Notify:FireClient(player, "Shop", { Ok = false, Id = id })
+			return
+		end
+		data.Coins = data.Coins - info.Price
+		table.insert(data.Trails, id)
+		owned = true
+		remotes.Notify:FireClient(player, "Shop", { Ok = true, Id = id })
+	end
+	if owned then
+		data.Trail = id
+		publish(player)
+		if player.Character then
+			applyTrail(player, player.Character)
+		end
+	end
+end
+
+----------------------------------------------------------------------
+-- Joining and leaving
+----------------------------------------------------------------------
+
+local function save(player)
+	local session = sessions[player]
+	if not session or not session.loaded or not session.dirty then
+		return
+	end
+	if not session.data.Finished then
+		session.data.Elapsed = now() - session.runStart
+	end
+	session.dirty = false
+	PlayerData.save(player.UserId, session.data)
+end
+
+local function onPlayerAdded(player)
+	if sessions[player] then
+		return
+	end
+	local stats = Instance.new("Folder")
+	stats.Name = "leaderstats"
+	for _, name in ipairs({ "Stage", "Coins", "Wins" }) do
+		local value = Instance.new("IntValue")
+		value.Name = name
+		value.Parent = stats
+	end
+	stats.Parent = player
+
+	local data, loaded = PlayerData.load(player.UserId)
+	if player.Parent ~= Players then
+		return
+	end
+	-- repair anything odd in old saves
+	if type(data.CoinIds) ~= "table" then
+		data.CoinIds = {}
+	end
+	if type(data.Trails) ~= "table" then
+		data.Trails = { "None" }
+	end
+	data.MaxStage = math.clamp(data.MaxStage or 1, 1, Config.FinishIndex)
+	data.Stage = math.clamp(data.Stage or 1, 1, data.MaxStage)
+
+	local session = {
+		data = data,
+		loaded = loaded,
+		runStart = now() - (data.Elapsed or 0),
+		lastTeleport = 0,
+		coins = {},
+		dirty = false,
+	}
+	for _, id in ipairs(data.CoinIds) do
+		session.coins[id] = true
+	end
+	sessions[player] = session
+
+	player.CharacterAdded:Connect(function(character)
+		onCharacter(player, character)
+	end)
+	player:SetAttribute("CoinMask", coinMask(data))
+	publish(player)
+	player:SetAttribute("Ready", true)
+	spawnPlayer(player)
+end
+
+local function onPlayerRemoving(player)
+	save(player)
+	sessions[player] = nil
+end
+
+function Game.start(builtWorld)
+	world = builtWorld
+
+	Players.CharacterAutoLoads = false
+	Players.RespawnTime = Config.Physics.RespawnTime
+	StarterPlayer.CharacterUseJumpPower = true
+	StarterPlayer.CharacterWalkSpeed = Config.Physics.WalkSpeed
+	StarterPlayer.CharacterJumpPower = Config.Physics.JumpPower
+	StarterPlayer.CameraMaxZoomDistance = 60
+	StarterPlayer.EnableMouseLockOption = true
+
+	remotes.Folder = Instance.new("Folder")
+	remotes.Folder.Name = "Remotes"
+	makeRemote("Notify")
+	makeRemote("Died").OnServerEvent:Connect(onDied)
+	makeRemote("Collect").OnServerEvent:Connect(onCollect)
+	makeRemote("Teleport").OnServerEvent:Connect(onTeleport)
+	makeRemote("Restart").OnServerEvent:Connect(onRestart)
+	makeRemote("Shop").OnServerEvent:Connect(onShop)
+	remotes.Folder.Parent = ReplicatedStorage
+
+	for index, checkpoint in pairs(world.Checkpoints) do
+		checkpoint.Trigger.Touched:Connect(function(hit)
+			local character = hit.Parent
+			local player = character and Players:GetPlayerFromCharacter(character)
+			if not player then
+				return
+			end
+			local humanoid = character:FindFirstChildOfClass("Humanoid")
+			if humanoid and humanoid.Health > 0 then
+				reachCheckpoint(player, index)
+			end
+		end)
+	end
+
+	Players.PlayerAdded:Connect(onPlayerAdded)
+	Players.PlayerRemoving:Connect(onPlayerRemoving)
+	for _, player in ipairs(Players:GetPlayers()) do
+		task.spawn(onPlayerAdded, player)
+	end
+
+	-- autosave + watchdog that revives anyone left without a character
+	task.spawn(function()
+		local ticks = 0
+		while true do
+			task.wait(3)
+			ticks = ticks + 1
+			for player, session in pairs(sessions) do
+				local character = player.Character
+				local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+				local alive = character and character.Parent and humanoid and humanoid.Health > 0
+				if alive or session.spawning then
+					session.missing = 0
+				else
+					session.missing = (session.missing or 0) + 1
+					if session.missing >= 2 then
+						session.missing = 0
+						task.spawn(spawnPlayer, player)
+					end
+				end
+				if ticks % 30 == 0 then
+					task.spawn(save, player)
+				end
+			end
+		end
+	end)
+
+	game:BindToClose(function()
+		if RunService:IsStudio() then
+			return
+		end
+		for player in pairs(sessions) do
+			save(player)
+		end
+	end)
+end
+
+return Game
+]]></ProtectedString></Properties></Item>
+<Item class="Script" referent="RBX9"><Properties><string name="Name">Main</string><ProtectedString name="Source"><![CDATA[-- Bobux Obby server entry point: build the world, then start the game rules.
+
+local Server = script.Parent
+
+local WorldBuilder = require(Server.WorldBuilder)
+local Game = require(Server.Game)
+
+local world = WorldBuilder.build()
+Game.start(world)
+
+print(string.format("[Bobux Obby] Ready: %d checkpoints, %d coins.", #world.Checkpoints, world.CoinCount))
+]]></ProtectedString></Properties></Item>
+<Item class="ModuleScript" referent="RBX10"><Properties><string name="Name">PlayerData</string><ProtectedString name="Source"><![CDATA[--[[
+	PlayerData
+	Loads and saves player progress with DataStoreService. Everything is
+	wrapped in pcall so the game still works in Studio with API access off
+	(progress just won't persist there).
+]]
+
+local DataStoreService = game:GetService("DataStoreService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+
+local PlayerData = {}
+
+local store = nil
+pcall(function()
+	store = DataStoreService:GetDataStore(Config.DataStoreName)
+end)
+
+function PlayerData.default()
+	return {
+		Stage = 1,
+		MaxStage = 1,
+		Coins = 0,
+		Wins = 0,
+		BestTime = 0,
+		Elapsed = 0,
+		Finished = false,
+		CoinIds = {},
+		Trails = { "None" },
+		Trail = "None",
+	}
+end
+
+-- Returns data, loadedOk. When loadedOk is false the data must not be saved
+-- (so a DataStore outage can never wipe real progress).
+function PlayerData.load(userId)
+	local data = PlayerData.default()
+	if not store then
+		return data, false
+	end
+	for attempt = 1, 3 do
+		local ok, result = pcall(function()
+			return store:GetAsync("p_" .. userId)
+		end)
+		if ok then
+			if type(result) == "table" then
+				for key, value in pairs(result) do
+					data[key] = value
+				end
+			end
+			return data, true
+		end
+		task.wait(attempt)
+	end
+	return data, false
+end
+
+function PlayerData.save(userId, data)
+	if not store then
+		return false
+	end
+	local ok = pcall(function()
+		store:SetAsync("p_" .. userId, data)
+	end)
+	return ok
+end
+
+return PlayerData
+]]></ProtectedString></Properties></Item>
+<Item class="ModuleScript" referent="RBX19"><Properties><string name="Name">WorldBuilder</string><ProtectedString name="Source"><![CDATA[--[[
+	WorldBuilder
+	Builds the whole obby from code when the server starts.
+
+	Want to edit the map by hand in Studio instead? Press Run, copy
+	Workspace.Obby, press Stop and paste it into Workspace. On the next start
+	the builder finds that folder and uses it rather than building a new one.
+]]
+
+local CollectionService = game:GetService("CollectionService")
+local Lighting = game:GetService("Lighting")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Kit = require(script.Kit)
+local Decor = require(script.Decor)
+
+local WorldBuilder = {}
+
+local ZONE_MODULES = { "Meadows", "Magma", "Frost", "Neon", "Starlight" }
+
+local function setupLighting()
+	local zone = Config.Zones[1]
+	for key, value in pairs(zone.Lighting) do
+		Lighting[key] = value
+	end
+	Lighting.GlobalShadows = true
+	Lighting.EnvironmentDiffuseScale = 1
+	Lighting.EnvironmentSpecularScale = 1
+
+	local function ensure(className, name)
+		local inst = Lighting:FindFirstChild(name)
+		if not inst then
+			inst = Instance.new(className)
+			inst.Name = name
+			inst.Parent = Lighting
+		end
+		return inst
+	end
+
+	local atmosphere = ensure("Atmosphere", "ObbyAtmosphere")
+	for key, value in pairs(zone.Atmosphere) do
+		atmosphere[key] = value
+	end
+	local cc = ensure("ColorCorrectionEffect", "ObbyColor")
+	for key, value in pairs(zone.Color_Correction) do
+		cc[key] = value
+	end
+	local bloom = ensure("BloomEffect", "ObbyBloom")
+	for key, value in pairs(zone.Bloom) do
+		bloom[key] = value
+	end
+	local rays = ensure("SunRaysEffect", "ObbySunRays")
+	rays.Intensity = 0.08
+	rays.Spread = 0.6
+	local sky = ensure("Sky", "ObbySky")
+	sky.StarCount = 5000
+	sky.SunAngularSize = 16
+	sky.MoonAngularSize = 12
+
+	local terrain = workspace:FindFirstChildOfClass("Terrain")
+	if terrain and not terrain:FindFirstChildOfClass("Clouds") then
+		local clouds = Instance.new("Clouds")
+		clouds.Cover = zone.Clouds.Cover
+		clouds.Density = zone.Clouds.Density
+		clouds.Color = zone.Clouds.Color
+		clouds.Parent = terrain
+	end
+end
+
+-- Use a map that was baked into the place file.
+local function adopt(root)
+	local checkpoints = {}
+	for _, trigger in ipairs(CollectionService:GetTagged("Checkpoint")) do
+		if trigger:IsDescendantOf(root) then
+			local index = trigger:GetAttribute("Stage")
+			local spawn = trigger.Parent:FindFirstChild("Spawn")
+			if index and spawn then
+				checkpoints[index] = { Index = index, Spawn = spawn, Trigger = trigger, CFrame = spawn.CFrame }
+			end
+		end
+	end
+	return {
+		Root = root,
+		Checkpoints = checkpoints,
+		CoinCount = root:GetAttribute("CoinCount") or 0,
+	}
+end
+
+function WorldBuilder.build()
+	setupLighting()
+
+	local existing = workspace:FindFirstChild("Obby")
+	if existing then
+		return adopt(existing)
+	end
+
+	local root = Instance.new("Folder")
+	root.Name = "Obby"
+
+	local zones = {}
+	local themes = {}
+	for i, name in ipairs(ZONE_MODULES) do
+		zones[i] = require(script.Zones:FindFirstChild(name))
+		themes[i] = zones[i].Theme
+	end
+
+	local K = Kit.new(root, CFrame.new(0, 120, 0), themes, 2024)
+	local lastZone = 0
+	for _, stage in ipairs(Config.Stages) do
+		K:checkpoint()
+		local zone = zones[stage.Zone]
+		if stage.Zone ~= lastZone then
+			lastZone = stage.Zone
+			K:push()
+			zone.Backdrop(K)
+			K:pop()
+		end
+		local build = zone.Stages[stage.Key]
+		if not build then
+			error("No builder for stage " .. tostring(stage.Key))
+		end
+		build(K)
+		Decor.scatter(K, zone.Scatter)
+	end
+	K:checkpoint()
+	Decor.finish(K)
+
+	root:SetAttribute("CoinCount", K.coinCount)
+	root.Parent = workspace
+
+	return {
+		Root = root,
+		Checkpoints = K.checkpoints,
+		CoinCount = K.coinCount,
+	}
+end
+
+return WorldBuilder
+]]></ProtectedString></Properties><Item class="ModuleScript" referent="RBX11"><Properties><string name="Name">Decor</string><ProtectedString name="Source"><![CDATA[--[[
+	Decor
+	Scenery builders. Everything here is non-colliding decoration placed
+	relative to the Kit cursor with (right, up, forward) offsets.
+]]
+
+local Decor = {}
+
+local RGB = Color3.fromRGB
+local rad = math.rad
+local Mat = Enum.Material
+
+local function spin(part, rx, ry, rz)
+	part.CFrame = part.CFrame * CFrame.Angles(rad(rx), rad(ry), rad(rz))
+	return part
+end
+
+function Decor.tree(K, x, y, z, s)
+	s = s or 1
+	K:decoCyl(1.3 * s, 5 * s, x, y + 2.5 * s, z, RGB(122, 86, 60), Mat.Wood)
+	local leaf = RGB(70, 170, 70)
+	K:decoBall(6.4 * s, x, y + 6.4 * s, z, leaf, Mat.Grass)
+	K:decoBall(4.6 * s, x + 1.7 * s, y + 5.2 * s, z + 0.9 * s, RGB(92, 190, 80), Mat.Grass)
+	K:decoBall(4.8 * s, x - 1.5 * s, y + 5.5 * s, z - 1 * s, RGB(58, 150, 66), Mat.Grass)
+end
+
+function Decor.pine(K, x, y, z, s)
+	s = s or 1
+	K:decoCyl(1.1 * s, 3 * s, x, y + 1.5 * s, z, RGB(96, 70, 54), Mat.Wood)
+	local sizes = { 6.5, 5, 3.4, 1.8 }
+	for i, d in ipairs(sizes) do
+		local h = y + (2.4 + i * 1.9) * s
+		K:decoCyl(d * s, 1.9 * s, x, h, z, RGB(46, 110, 86), Mat.Grass)
+		K:decoCyl(d * s * 0.8, 0.4 * s, x, h + 1.1 * s, z, RGB(240, 248, 255), Mat.Snow)
+	end
+end
+
+function Decor.rock(K, x, y, z, s, color, material)
+	local rng = K.rng
+	for _ = 1, 2 do
+		local p = K:deco(
+			s * rng:NextNumber(0.7, 1.2),
+			s * rng:NextNumber(0.6, 1),
+			s * rng:NextNumber(0.7, 1.2),
+			x + rng:NextNumber(-0.3, 0.3) * s,
+			y + s * 0.3,
+			z + rng:NextNumber(-0.3, 0.3) * s,
+			color,
+			material
+		)
+		spin(p, rng:NextNumber(-20, 20), rng:NextNumber(0, 90), rng:NextNumber(-20, 20))
+	end
+end
+
+function Decor.cloud(K, x, y, z, s)
+	local white = RGB(255, 255, 255)
+	local extra = { Transparency = 0.12, CastShadow = false }
+	K:decoBall(12 * s, x, y, z, white, Mat.SmoothPlastic, extra)
+	K:decoBall(9 * s, x + 7 * s, y - 1 * s, z + 2 * s, white, Mat.SmoothPlastic, extra)
+	K:decoBall(8 * s, x - 7 * s, y - 1.5 * s, z - 1 * s, white, Mat.SmoothPlastic, extra)
+	K:decoBall(7 * s, x + 2 * s, y + 3 * s, z - 3 * s, white, Mat.SmoothPlastic, extra)
+end
+
+-- A little floating grass island with a tree or rocks on top.
+function Decor.islet(K, x, y, z, r)
+	local rng = K.rng
+	K:decoCyl(r * 2, 1.2, x, y, z, RGB(98, 190, 86), Mat.Grass)
+	K:decoCyl(r * 1.5, 2.6, x, y - 1.9, z, RGB(134, 98, 72), Mat.Ground)
+	K:decoCyl(r * 0.8, 2.2, x, y - 4.3, z, RGB(112, 90, 76), Mat.Ground)
+	if rng:NextNumber() < 0.7 then
+		Decor.tree(K, x, y + 0.6, z, rng:NextNumber(0.8, 1.3) * math.min(1.4, r / 6))
+	else
+		Decor.rock(K, x, y + 0.6, z, r * 0.5, RGB(150, 150, 158), Mat.Slate)
+	end
+	for _ = 1, 3 do
+		local a = rng:NextNumber(0, math.pi * 2)
+		local fx, fz = x + math.cos(a) * r * 0.7, z + math.sin(a) * r * 0.7
+		K:decoBall(0.9, fx, y + 1.3, fz, Color3.fromHSV(rng:NextNumber(), 0.6, 1), Mat.Neon, { CastShadow = false })
+	end
+end
+
+-- A jagged basalt spire with a glowing crack.
+function Decor.spire(K, x, y, z, w, h)
+	local rng = K.rng
+	local rock = RGB(48, 44, 50)
+	spin(K:deco(w, h * 0.5, w, x, y + h * 0.25, z, rock, Mat.Basalt), 0, rng:NextNumber(0, 90), 0)
+	spin(K:deco(w * 0.68, h * 0.35, w * 0.68, x, y + h * 0.66, z, rock, Mat.Basalt), 4, rng:NextNumber(0, 90), 4)
+	spin(K:deco(w * 0.4, h * 0.25, w * 0.4, x, y + h * 0.92, z, RGB(36, 32, 38), Mat.Basalt), -6, rng:NextNumber(0, 90), 6)
+	K:deco(w * 0.72, 0.4, w * 0.72, x, y + h * 0.5, z, RGB(255, 120, 30), Mat.Neon, { CastShadow = false })
+end
+
+function Decor.iceIslet(K, x, y, z, r)
+	local rng = K.rng
+	K:decoCyl(r * 2, 1.2, x, y, z, RGB(240, 248, 255), Mat.Snow)
+	K:decoCyl(r * 1.4, 3, x, y - 2.1, z, RGB(140, 195, 235), Mat.Glacier, { Transparency = 0.1 })
+	K:decoCyl(r * 0.6, 3, x, y - 5, z, RGB(120, 180, 230), Mat.Glacier, { Transparency = 0.15 })
+	if rng:NextNumber() < 0.6 then
+		Decor.pine(K, x, y + 0.6, z, rng:NextNumber(0.8, 1.3))
+	else
+		Decor.crystals(K, x, y + 0.6, z, r * 0.8, RGB(150, 225, 255))
+	end
+end
+
+-- A cluster of glowing crystal shards.
+function Decor.crystals(K, x, y, z, s, color)
+	local rng = K.rng
+	for i = 1, 3 do
+		local h = s * rng:NextNumber(0.8, 1.6)
+		local p = K:deco(s * 0.3, h, s * 0.3, x + (i - 2) * s * 0.3, y + h * 0.4, z + rng:NextNumber(-0.2, 0.2) * s, color, Mat.Neon, {
+			Transparency = 0.25,
+			CastShadow = false,
+		})
+		spin(p, rng:NextNumber(-22, 22), 45, rng:NextNumber(-22, 22))
+	end
+end
+
+-- A skyscraper whose roof is at height y.
+function Decor.building(K, x, y, z, w, d)
+	local rng = K.rng
+	local bottom = -150
+	local h = y - bottom
+	K:deco(w, h, d, x, bottom + h / 2, z, RGB(20, 20, 34), Mat.Metal, { CastShadow = false })
+	local colors = { RGB(0, 240, 230), RGB(255, 0, 200), RGB(255, 220, 40), RGB(120, 90, 255) }
+	local color = colors[rng:NextInteger(1, #colors)]
+	for i = 1, 4 do
+		K:deco(w + 0.3, 0.7, d + 0.3, x, y - 4 - (i - 1) * 9, z, color, Mat.Neon, { CastShadow = false })
+	end
+	K:deco(0.5, 8, 0.5, x, y + 4, z, RGB(60, 60, 80), Mat.Metal)
+	K:decoBall(1.4, x, y + 8.4, z, RGB(255, 40, 60), Mat.Neon, { CastShadow = false })
+end
+
+function Decor.planet(K, x, y, z, d, color, ring)
+	K:decoBall(d, x, y, z, color, Mat.SmoothPlastic, { CastShadow = false })
+	if ring then
+		local p = K:decoCyl(d * 1.9, 0.5, x, y, z, ring, Mat.Neon, { Transparency = 0.45, CastShadow = false })
+		spin(p, 0, 0, 24)
+	end
+end
+
+-- A tall stacked cone (volcano / mountain). top glows if given.
+function Decor.peak(K, x, y, z, baseDiameter, height, color, material, top)
+	local layers = 5
+	for i = 1, layers do
+		local f = (i - 1) / layers
+		K:decoCyl(baseDiameter * (1 - f * 0.82), height / layers + 0.5, x, y + height * (f + 0.5 / layers), z, color, material, {
+			CastShadow = false,
+		})
+	end
+	if top then
+		K:decoCyl(baseDiameter * 0.2, 2, x, y + height + 0.6, z, top, Mat.Neon, { CastShadow = false })
+	end
+end
+
+-- A windmill with turning sails at the given spot.
+function Decor.windmill(K, x, y, z)
+	K:decoCyl(8, 12, x, y + 6, z, RGB(236, 224, 200), Mat.Brick)
+	K:decoCyl(6, 8, x, y + 16, z, RGB(236, 224, 200), Mat.Brick)
+	K:decoCyl(7.5, 2, x, y + 21, z, RGB(170, 70, 60), Mat.Slate)
+	for i = 0, 1 do
+		local sail = K:deco(1.2, 22, 0.4, x, y + 17, z - 4, RGB(250, 245, 230), Mat.Fabric)
+		spin(sail, 0, 0, i * 90)
+		K:rotor(sail, x, y + 17, z - 4, 0, 0, 1, 0.6)
+	end
+end
+
+-- Trophy and fireworks beyond the finish line.
+function Decor.finish(K)
+	local gold = RGB(255, 200, 40)
+	K:decoCyl(10, 1.2, 0, -0.4, 9, RGB(60, 50, 110), Mat.Marble)
+	K:decoCyl(5, 1.4, 0, 0.9, 9, gold, Mat.Metal)
+	K:decoCyl(1.6, 4, 0, 3.6, 9, gold, Mat.Metal)
+	K:decoBall(6, 0, 8, 9, gold, Mat.Metal, { Reflectance = 0.3 })
+	K:decoCyl(7, 1, 0, 10.6, 9, gold, Mat.Metal)
+	local star = K:decoBall(2.4, 0, 13.4, 9, RGB(255, 245, 170), Mat.Neon)
+	K:light(star, gold, 30, 2.5)
+	local hues = { 0, 0.33, 0.6, 0.85 }
+	for i, hue in ipairs(hues) do
+		local a = (i - 1) * math.pi / 2 + math.pi / 4
+		local emitterPart = K:decoBall(1, math.cos(a) * 12, 1, 9 + math.sin(a) * 12, gold, Mat.Neon, { Transparency = 1 })
+		local color = Color3.fromHSV(hue, 0.8, 1)
+		K.make("ParticleEmitter", {
+			Name = "Firework",
+			Color = ColorSequence.new(color, RGB(255, 255, 255)),
+			LightEmission = 1,
+			Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1.2), NumberSequenceKeypoint.new(1, 0) }),
+			Lifetime = NumberRange.new(1.2, 2.2),
+			Speed = NumberRange.new(26, 40),
+			SpreadAngle = Vector2.new(18, 18),
+			Acceleration = Vector3.new(0, -24, 0),
+			Rate = 22,
+			EmissionDirection = Enum.NormalId.Top,
+		}, emitterPart)
+	end
+end
+
+--[[
+	Scatter scenery along the path that was just built. fn(K, x, side) is
+	called with the cursor on a path point and x a safe sideways distance.
+]]
+function Decor.scatter(K, fn)
+	local rng = K.rng
+	local saved = K.cf
+	for i, point in ipairs(K.trail) do
+		if i % 2 == 1 or rng:NextNumber() < 0.3 then
+			local side = (rng:NextNumber() < 0.5) and -1 or 1
+			K.cf = point.cf
+			fn(K, side * (point.clear + 13 + rng:NextNumber(0, 14)), side)
+		end
+	end
+	K.cf = saved
+end
+
+return Decor
+]]></ProtectedString></Properties></Item>
+<Item class="ModuleScript" referent="RBX12"><Properties><string name="Name">Kit</string><ProtectedString name="Source"><![CDATA[--[[
+	Kit
+	The obby construction toolkit. A Kit owns a "cursor": a CFrame sitting on
+	the walking surface at the front edge of the last thing that was built,
+	looking down the course. Every helper builds relative to the cursor using
+	(right, up, forward) offsets, so the whole course can bend and climb
+	without any stage needing to know where in the world it is.
+
+	Moving things are NOT animated by the server. Parts are tagged (Mover,
+	Rotor, Blinker, ...) and given attributes; every client animates them
+	locally from the shared server clock, which keeps movement perfectly
+	smooth and lets platforms carry players without rubber-banding.
+]]
+
+local CollectionService = game:GetService("CollectionService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+
+local Kit = {}
+Kit.__index = Kit
+
+local V3 = Vector3.new
+local RGB = Color3.fromRGB
+local rad = math.rad
+local Mat = Enum.Material
+
+local WHITE = RGB(255, 255, 255)
+local DARK = RGB(34, 36, 50)
+local GOLD = RGB(255, 200, 40)
+
+local function tag(inst, name)
+	CollectionService:AddTag(inst, name)
+end
+
+local function apply(inst, props)
+	if props then
+		for key, value in pairs(props) do
+			inst[key] = value
+		end
+	end
+	return inst
+end
+
+local function make(className, props, parent)
+	local inst = Instance.new(className)
+	apply(inst, props)
+	if parent then
+		inst.Parent = parent
+	end
+	return inst
+end
+
+Kit.make = make
+Kit.tag = tag
+
+function Kit.new(root, origin, themes, seed)
+	local self = setmetatable({}, Kit)
+	self.root = root
+	self.folder = root
+	self.cf = origin
+	self.themes = themes
+	self.theme = themes[1]
+	self.rng = Random.new(seed or 1337)
+	self.stage = 0
+	self.coinCount = 0
+	self.pickupCount = 0
+	self.checkpoints = {}
+	self.trail = {}
+	self.stack = {}
+	return self
+end
+
+----------------------------------------------------------------------
+-- Cursor
+----------------------------------------------------------------------
+
+-- Local (right, up, forward) offset -> world CFrame.
+function Kit:w(x, y, z)
+	return self.cf * CFrame.new(x or 0, y or 0, -(z or 0))
+end
+
+function Kit:wp(x, y, z)
+	return self:w(x, y, z).Position
+end
+
+-- Local (right, up, forward) direction -> world vector.
+function Kit:wv(x, y, z)
+	return self.cf:VectorToWorldSpace(V3(x, y, -z))
+end
+
+function Kit:move(x, y, z)
+	self.cf = self:w(x, y, z)
+end
+
+function Kit:fwd(distance)
+	self.cf = self:w(0, 0, distance)
+end
+
+function Kit:up(height)
+	self.cf = self:w(0, height, 0)
+end
+
+-- Positive degrees turn the course to the right.
+function Kit:turn(degrees)
+	self.cf = self.cf * CFrame.Angles(0, -rad(degrees), 0)
+end
+
+function Kit:push()
+	table.insert(self.stack, self.cf)
+end
+
+function Kit:pop()
+	self.cf = table.remove(self.stack)
+end
+
+-- Remember a point on the path (used later to scatter scenery around it).
+function Kit:mark(clearance, z)
+	table.insert(self.trail, { cf = self:w(0, 0, z or 0), clear = clearance })
+end
+
+----------------------------------------------------------------------
+-- Primitive parts
+----------------------------------------------------------------------
+
+function Kit:newPart(className, props)
+	local part = Instance.new(className)
+	part.Anchored = true
+	part.TopSurface = Enum.SurfaceType.Smooth
+	part.BottomSurface = Enum.SurfaceType.Smooth
+	part.CanTouch = false
+	apply(part, props)
+	part.Parent = self.folder
+	return part
+end
+
+-- Solid block centred at the local offset.
+function Kit:block(sx, sy, sz, x, y, z, color, material, extra)
+	local part = self:newPart("Part", {
+		Size = V3(sx, sy, sz),
+		CFrame = self:w(x, y, z),
+		Color = color,
+		Material = material or Mat.SmoothPlastic,
+	})
+	return apply(part, extra)
+end
+
+local function ghost(part)
+	part.CanCollide = false
+	part.CanQuery = false
+	part.CanTouch = false
+	return part
+end
+Kit.ghost = ghost
+
+-- Decorative block: no collisions, never blocks the camera.
+function Kit:deco(sx, sy, sz, x, y, z, color, material, extra)
+	local part = ghost(self:block(sx, sy, sz, x, y, z, color, material))
+	part.Name = "Deco"
+	return apply(part, extra)
+end
+
+-- Upright cylinder (its round faces point up and down).
+function Kit:cyl(diameter, height, x, y, z, color, material, extra)
+	local part = self:newPart("Part", {
+		Shape = Enum.PartType.Cylinder,
+		Size = V3(height, diameter, diameter),
+		CFrame = self:w(x, y, z) * CFrame.Angles(0, 0, rad(90)),
+		Color = color,
+		Material = material or Mat.SmoothPlastic,
+	})
+	return apply(part, extra)
+end
+
+function Kit:ball(diameter, x, y, z, color, material, extra)
+	local part = self:newPart("Part", {
+		Shape = Enum.PartType.Ball,
+		Size = V3(diameter, diameter, diameter),
+		CFrame = self:w(x, y, z),
+		Color = color,
+		Material = material or Mat.SmoothPlastic,
+	})
+	return apply(part, extra)
+end
+
+function Kit:decoCyl(diameter, height, x, y, z, color, material, extra)
+	local part = ghost(self:cyl(diameter, height, x, y, z, color, material))
+	part.Name = "Deco"
+	return apply(part, extra)
+end
+
+function Kit:decoBall(diameter, x, y, z, color, material, extra)
+	local part = ghost(self:ball(diameter, x, y, z, color, material))
+	part.Name = "Deco"
+	return apply(part, extra)
+end
+
+function Kit:light(parent, color, range, brightness)
+	return make("PointLight", {
+		Color = color,
+		Range = range or 12,
+		Brightness = brightness or 1.5,
+		Shadows = false,
+	}, parent)
+end
+
+----------------------------------------------------------------------
+-- Text
+----------------------------------------------------------------------
+
+function Kit:billboard(parent, widthStuds, heightStuds, offsetY, maxDistance)
+	return make("BillboardGui", {
+		Name = "Billboard",
+		Size = UDim2.new(widthStuds, 0, heightStuds, 0),
+		StudsOffsetWorldSpace = V3(0, offsetY or 0, 0),
+		MaxDistance = maxDistance or 200,
+		LightInfluence = 0,
+		ResetOnSpawn = false,
+	}, parent)
+end
+
+function Kit:label(parent, text, color, position, size, font)
+	local label = make("TextLabel", {
+		BackgroundTransparency = 1,
+		Position = position or UDim2.new(0, 0, 0, 0),
+		Size = size or UDim2.new(1, 0, 1, 0),
+		Text = text,
+		TextScaled = true,
+		TextColor3 = color or WHITE,
+		Font = font or Config.UI.Font,
+		TextStrokeTransparency = 0.2,
+		TextStrokeColor3 = RGB(10, 12, 24),
+	}, parent)
+	return label
+end
+
+-- Text painted on the front and back faces of a part.
+function Kit:surfaceText(part, text, color)
+	for _, face in ipairs({ Enum.NormalId.Front, Enum.NormalId.Back }) do
+		local gui = make("SurfaceGui", {
+			Name = "Sign",
+			Face = face,
+			SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud,
+			PixelsPerStud = 24,
+			LightInfluence = 0,
+			ResetOnSpawn = false,
+		}, part)
+		self:label(gui, text, color)
+	end
+end
+
+----------------------------------------------------------------------
+-- Floors
+----------------------------------------------------------------------
+
+-- Themed underside so platforms look like chunky floating scenery instead
+-- of flat tiles. (x, y, zc) is the centre of the platform's bottom face.
+function Kit:underside(wid, len, x, y, zc)
+	local t = self.theme
+	local style = t.Style
+	local big = wid >= 5 and len >= 5
+	if style == "island" then
+		self:block(wid - 0.6, 2.2, len - 0.6, x, y - 1.1, zc, t.Body, t.BodyMat).Name = "Soil"
+		if big then
+			self:deco(wid * 0.62, 2, len * 0.62, x, y - 3.2, zc, t.Body2, t.BodyMat)
+			self:deco(wid * 0.3, 1.6, len * 0.3, x, y - 5, zc, t.Body2, t.BodyMat)
+		end
+	elseif style == "basalt" then
+		self:block(wid - 0.5, 2.4, len - 0.5, x, y - 1.2, zc, t.Body, t.BodyMat).Name = "Rock"
+		self:deco(wid + 0.12, 0.3, len + 0.12, x, y - 0.7, zc, t.Accent, Mat.Neon)
+		if big then
+			self:deco(wid * 0.6, 2.2, len * 0.6, x, y - 3.5, zc, t.Body2, t.BodyMat)
+		end
+	elseif style == "ice" then
+		self:block(wid - 0.4, 2, len - 0.4, x, y - 1, zc, t.Body, t.BodyMat, { Transparency = 0.15 }).Name = "Glacier"
+		if big then
+			for _ = 1, 2 do
+				local h = self.rng:NextNumber(1.5, 3.2)
+				local ix = x + self.rng:NextNumber(-0.3, 0.3) * wid
+				local iz = zc + self.rng:NextNumber(-0.3, 0.3) * len
+				self:deco(0.9, h, 0.9, ix, y - 2 - h / 2, iz, t.Body2, Mat.Ice, { Transparency = 0.2 })
+			end
+		end
+	elseif style == "tech" then
+		self:block(wid - 0.6, 0.8, len - 0.6, x, y - 0.4, zc, t.Body, t.BodyMat).Name = "Chassis"
+		self:deco(0.25, 0.4, len, x - wid / 2 - 0.12, y + t.Thick / 2, zc, t.Accent, Mat.Neon)
+		self:deco(0.25, 0.4, len, x + wid / 2 + 0.12, y + t.Thick / 2, zc, t.Accent2, Mat.Neon)
+	elseif style == "crystal" then
+		self:deco(wid * 0.6, 0.5, len * 0.6, x, y - 0.3, zc, t.Accent, Mat.Neon)
+		if big then
+			local shard = self:deco(wid * 0.34, 2.6, len * 0.34, x, y - 1.9, zc, t.Body, t.BodyMat, { Transparency = 0.1 })
+			shard.CFrame = shard.CFrame * CFrame.Angles(0, rad(45), 0)
+		end
+	end
+end
+
+--[[
+	Lay a platform starting at the cursor and move the cursor to its far edge.
+	options: x (sideways shift), thick, color, material, bare (no underside),
+	stay (don't move the cursor), name
+]]
+function Kit:floor(len, wid, o)
+	o = o or {}
+	local t = self.theme
+	local x = o.x or 0
+	local thick = o.thick or t.Thick
+	local top = self:block(wid, thick, len, x, -thick / 2, len / 2, o.color or t.Floor, o.material or t.FloorMat)
+	top.Name = o.name or "Platform"
+	if not o.bare then
+		self:underside(wid, len, x, -thick, len / 2)
+	end
+	local marks = math.max(1, math.floor(len / 14 + 0.5))
+	for i = 1, marks do
+		self:mark(math.abs(x) + wid / 2, len * (i - 0.5) / marks)
+	end
+	if not o.stay then
+		self:fwd(len)
+	end
+	return top
+end
+
+-- Leave a gap, change height, then lay a platform.
+function Kit:hop(gap, rise, len, wid, o)
+	self:move(0, rise, gap)
+	return self:floor(len, wid, o)
+end
+
+-- A plain single-part platform (used for anything that moves). Its top
+-- surface is at local height y and it is centred at (x, zc).
+function Kit:slab(len, wid, x, y, zc, o)
+	o = o or {}
+	local t = self.theme
+	local part = self:block(wid, 1.2, len, x, y - 0.6, zc, o.color or t.Mover, o.material or t.MoverMat)
+	part.Name = o.name or "MovingPlatform"
+	self:mark(math.abs(x) + wid / 2 + 6, zc)
+	return part
+end
+
+-- Slippery floor.
+function Kit:ice(len, wid, o)
+	o = o or {}
+	o.color = RGB(160, 225, 255)
+	o.material = Mat.Ice
+	o.name = "Ice"
+	local part = self:floor(len, wid, o)
+	part.CustomPhysicalProperties = PhysicalProperties.new(0.9, 0.02, 0, 100, 1)
+	part.Transparency = 0.08
+	return part
+end
+
+-- A tile that crumbles shortly after the player steps on it.
+function Kit:vanish(len, wid, x, o)
+	o = o or {}
+	local t = self.theme
+	x = x or 0
+	local part = self:block(wid, 1, len, x, -0.5, len / 2, t.Vanish, t.VanishMat)
+	part.Name = "CrumbleTile"
+	part:SetAttribute("Delay", o.delay or 0.55)
+	part:SetAttribute("Respawn", o.respawn or 3)
+	tag(part, "Vanish")
+	self:mark(math.abs(x) + wid / 2, len / 2)
+	self:fwd(len)
+	return part
+end
+
+-- Conveyor belt. (vx, vz) is the push in studs/second: right and forward.
+function Kit:conveyor(len, wid, vx, vz)
+	local t = self.theme
+	local belt = self:block(wid, 1.2, len, 0, -0.6, len / 2, RGB(44, 48, 62), Mat.DiamondPlate)
+	belt.Name = "Conveyor"
+	local velocity = self:wv(vx, 0, vz)
+	belt.AssemblyLinearVelocity = velocity
+	belt:SetAttribute("Velocity", velocity)
+	tag(belt, "Conveyor")
+	self:deco(0.5, 0.6, len, -(wid / 2 + 0.25), -0.3, len / 2, t.Accent, Mat.Neon)
+	self:deco(0.5, 0.6, len, wid / 2 + 0.25, -0.3, len / 2, t.Accent, Mat.Neon)
+	-- sliding arrows show which way the belt pushes
+	if math.abs(vz) >= math.abs(vx) then
+		local count = math.max(2, math.floor(len / 6))
+		local travel = len - 1
+		for i = 1, count do
+			local z0 = (vz > 0) and 0.5 or (len - 0.5)
+			local arrow = self:deco(wid * 0.55, 0.08, 0.7, 0, 0.05, z0, t.Accent, Mat.Neon)
+			self:mover(arrow, 0, 0, (vz > 0) and travel or -travel, travel / math.abs(vz), (i - 1) / count, "loop")
+		end
+	else
+		local count = math.max(2, math.floor(wid / 3))
+		local travel = wid - 1
+		for i = 1, count do
+			local x0 = (vx > 0) and -(wid / 2 - 0.5) or (wid / 2 - 0.5)
+			local arrow = self:deco(0.7, 0.08, len * 0.6, x0, 0.05, len / 2, t.Accent, Mat.Neon)
+			self:mover(arrow, (vx > 0) and travel or -travel, 0, 0, travel / math.abs(vx), (i - 1) / count, "loop")
+		end
+	end
+	self:mark(wid / 2, len / 2)
+	self:fwd(len)
+	return belt
+end
+
+-- A sheer wall. The cursor ends up on top of it, ready for a floor.
+function Kit:cliff(height, wid)
+	local t = self.theme
+	wid = wid or 10
+	local wallHeight = height + 3 - t.Thick
+	self:block(wid - 0.4, wallHeight, 3, 0, (height - t.Thick - 3) / 2, 1.5, t.Body, t.BodyMat).Name = "Cliff"
+	self:up(height)
+end
+
+-- A free-standing climbable truss. Heights must be even numbers.
+function Kit:truss(height, x, y0, z, color)
+	local part = self:newPart("TrussPart", {
+		Size = V3(2, height, 2),
+		CFrame = self:w(x, y0 + height / 2, z),
+		Color = color or self.theme.Ladder,
+		Material = Mat.Metal,
+	})
+	part.Name = "Ladder"
+	return part
+end
+
+-- A ladder up a cliff face. The cursor ends up at the top of the cliff.
+function Kit:ladder(height, wid)
+	local t = self.theme
+	wid = wid or 8
+	self:block(wid, t.Thick, 2, 0, -t.Thick / 2, 1, t.Floor, t.FloorMat).Name = "LadderStep"
+	local truss = self:truss(height, 0, 0, 1)
+	local wallHeight = height + 3 - t.Thick
+	self:block(wid - 0.4, wallHeight, 2.5, 0, (height - t.Thick - 3) / 2, 3.25, t.Body, t.BodyMat).Name = "Cliff"
+	self:mark(wid / 2, 1)
+	self:move(0, height, 2)
+	return truss
+end
+
+----------------------------------------------------------------------
+-- Motion (animated on each client, see client/World)
+----------------------------------------------------------------------
+
+--[[
+	Slide a part back and forth between where it is now and an offset.
+	ease: "sine" (default), "linear", "hold" (pauses at each end),
+	"slam" (crusher), "loop" (one-way, snaps back)
+]]
+function Kit:mover(part, dx, dy, dz, period, phase, ease)
+	local p0 = part.Position
+	part:SetAttribute("P0", p0)
+	part:SetAttribute("P1", p0 + self:wv(dx, dy, dz))
+	part:SetAttribute("Period", period)
+	part:SetAttribute("Phase", phase or 0)
+	if ease then
+		part:SetAttribute("Ease", ease)
+	end
+	tag(part, "Mover")
+	return part
+end
+
+--[[
+	Rotate a part around a pivot point. The axis is given in local
+	(right, up, forward) terms. options: swing (radians, makes it a
+	pendulum), period, phase, upright (orbit without tilting)
+]]
+function Kit:rotor(part, px, py, pz, ax, ay, az, speed, o)
+	part:SetAttribute("Pivot", self:wp(px, py, pz))
+	part:SetAttribute("Axis", self:wv(ax, ay, az).Unit)
+	part:SetAttribute("Speed", speed)
+	if o then
+		if o.swing then
+			part:SetAttribute("Swing", o.swing)
+			part:SetAttribute("Period", o.period or 3)
+		end
+		if o.phase then
+			part:SetAttribute("Phase", o.phase)
+		end
+		if o.upright then
+			part:SetAttribute("Upright", true)
+		end
+	end
+	tag(part, "Rotor")
+	return part
+end
+
+-- Switch a part on and off on a timer. Solid blinkers are platforms that
+-- phase in and out; the rest are hazards that only hurt while "on".
+function Kit:blink(part, onTime, offTime, phase, solid)
+	part:SetAttribute("On", onTime)
+	part:SetAttribute("Off", offTime)
+	part:SetAttribute("Phase", phase or 0)
+	if solid then
+		part:SetAttribute("Solid", true)
+	end
+	tag(part, "Blinker")
+	return part
+end
+
+----------------------------------------------------------------------
+-- Hazards
+----------------------------------------------------------------------
+
+function Kit:kill(sx, sy, sz, x, y, z, extra)
+	local part = self:block(sx, sy, sz, x, y, z, self.theme.Hazard, Mat.Neon)
+	part.Name = "Hazard"
+	part.CanCollide = false
+	part.CastShadow = false
+	tag(part, "Kill")
+	return apply(part, extra)
+end
+
+function Kit:killBall(diameter, x, y, z)
+	local part = self:ball(diameter, x, y, z, self.theme.Hazard, Mat.Neon)
+	part.Name = "Hazard"
+	part.CanCollide = false
+	part.CastShadow = false
+	tag(part, "Kill")
+	return part
+end
+
+-- A glowing deadly floor far below the path.
+function Kit:lavaSea(len, wid, depth)
+	local sea = self:block(wid, 2, len, 0, -depth - 1, len / 2 - 6, self.theme.Lava or self.theme.Hazard, Mat.Neon)
+	sea.Name = "Lava"
+	sea.CanCollide = false
+	sea.CastShadow = false
+	tag(sea, "Kill")
+	return sea
+end
+
+-- A blinking beam of death.
+function Kit:laser(sx, sy, sz, x, y, z, onTime, offTime, phase)
+	local beam = self:kill(sx, sy, sz, x, y, z, { Name = "Laser" })
+	self:blink(beam, onTime, offTime, phase)
+	return beam
+end
+
+-- A flame jet across the path at forward offset z.
+function Kit:jet(z, wid, onTime, offTime, phase)
+	local t = self.theme
+	self:deco(wid, 0.2, 2.4, 0, 0.1, z, DARK, Mat.Metal)
+	self:deco(wid - 1, 0.1, 0.6, 0, 0.22, z, t.Accent, Mat.Neon)
+	local flame = self:kill(wid, 7, 1.6, 0, 3.7, z, { Name = "FireJet", Transparency = 0.2, Color = RGB(255, 130, 30) })
+	self:blink(flame, onTime, offTime, phase)
+	return flame
+end
+
+--[[
+	A spinning bar hazard centred at forward offset z.
+	options: high (bar at head height: don't jump), cross (two bars),
+	x (sideways shift)
+]]
+function Kit:spinner(z, len, speed, o)
+	o = o or {}
+	local t = self.theme
+	local x = o.x or 0
+	local y = o.high and 7.6 or 1.1
+	local thick = o.high and 0.8 or 1
+	local hubHeight = y + 0.9
+	if not o.noHub then
+		self:cyl(2.2, hubHeight, x, hubHeight / 2, z, t.Post, Mat.Metal).Name = "Hub"
+	end
+	local bar = self:kill(len, thick, thick, x, y, z, { Name = "SpinnerBar" })
+	self:rotor(bar, x, y, z, 0, 1, 0, speed)
+	if o.cross then
+		local bar2 = self:kill(thick, thick, len, x, y, z, { Name = "SpinnerBar" })
+		self:rotor(bar2, x, y, z, 0, 1, 0, speed)
+	end
+	return bar
+end
+
+-- A swinging blade over the path at forward offset z.
+function Kit:pendulum(z, o)
+	o = o or {}
+	local t = self.theme
+	local arm = o.arm or 13
+	local pivotY = arm + 2
+	local base = o.base or -8
+	local span = o.span or 7.5
+	local postHeight = pivotY - base + 0.6
+	self:deco(0.9, postHeight, 0.9, -span, base + postHeight / 2, z, t.Post, Mat.Metal)
+	self:deco(0.9, postHeight, 0.9, span, base + postHeight / 2, z, t.Post, Mat.Metal)
+	self:deco(span * 2 + 0.9, 0.9, 0.9, 0, pivotY + 0.3, z, t.Post, Mat.Metal)
+	local swing = { swing = o.amp or rad(55), period = o.period or 3.2, phase = o.phase or 0 }
+	local rod = self:deco(0.5, arm, 0.5, 0, pivotY - arm / 2, z, t.Post, Mat.Metal)
+	self:rotor(rod, 0, pivotY, z, 0, 0, 1, 0, swing)
+	local blade = self:kill(5, 3.2, 1, 0, pivotY - arm, z, { Name = "Blade" })
+	self:rotor(blade, 0, pivotY, z, 0, 0, 1, 0, swing)
+	return blade
+end
+
+-- A block that slams down on the path at forward offset z.
+function Kit:crusher(z, o)
+	o = o or {}
+	local t = self.theme
+	local wid = o.wid or 8
+	local len = o.len or 5
+	local height = 7
+	local clearance = 9
+	local centreY = clearance + height / 2
+	local drop = -(clearance - 0.4)
+	local period = o.period or 3.4
+	local phase = o.phase or 0
+	local body = self:block(wid, height, len, 0, centreY, z, t.Post, Mat.Metal, { CanCollide = false })
+	body.Name = "Crusher"
+	tag(body, "Kill")
+	self:mover(body, 0, drop, 0, period, phase, "slam")
+	local plate = self:kill(wid + 0.3, 0.7, len + 0.3, 0, clearance + 0.2, z, { Name = "CrusherPlate" })
+	self:mover(plate, 0, drop, 0, period, phase, "slam")
+	local stripe = self:deco(wid + 0.2, 0.6, len + 0.2, 0, centreY + 1, z, GOLD, Mat.Neon)
+	self:mover(stripe, 0, drop, 0, period, phase, "slam")
+	for _, side in ipairs({ -1, 1 }) do
+		self:deco(0.7, 20, 0.7, side * (wid / 2 + 0.7), 9, z, t.Post, Mat.Metal)
+	end
+	return body
+end
+
+----------------------------------------------------------------------
+-- Pickups
+----------------------------------------------------------------------
+
+function Kit:coin(x, y, z)
+	self.coinCount = self.coinCount + 1
+	local coin = self:newPart("Part", {
+		Shape = Enum.PartType.Cylinder,
+		Size = V3(0.35, 2.4, 2.4),
+		CFrame = self:w(x, y, z),
+		Color = GOLD,
+		Material = Mat.Neon,
+		CanCollide = false,
+		CastShadow = false,
+	})
+	coin.Name = "Coin"
+	coin:SetAttribute("Id", self.coinCount)
+	tag(coin, "Coin")
+	return coin
+end
+
+-- A row of coins starting at (x, y, z) and stepping by (dx, dy, dz).
+function Kit:coins(count, x, y, z, dx, dy, dz)
+	for i = 0, count - 1 do
+		self:coin(x + (dx or 0) * i, y + (dy or 0) * i, z + (dz or 0) * i)
+	end
+end
+
+-- A floating power-up orb.
+function Kit:powerup(kind, x, y, z)
+	local cfg = Config.PowerUps[kind]
+	self.pickupCount = self.pickupCount + 1
+	self:deco(4.4, 0.2, 4.4, x, y - 2.9, z, cfg.Color, Mat.Neon, { Transparency = 0.45, CastShadow = false })
+	local orb = self:ball(3, x, y, z, cfg.Color, Mat.Neon, {
+		Transparency = 0.2,
+		CanCollide = false,
+		CastShadow = false,
+	})
+	orb.Name = "PowerUp_" .. kind
+	orb:SetAttribute("Kind", kind)
+	orb:SetAttribute("Id", self.pickupCount)
+	tag(orb, "PowerUp")
+	self:light(orb, cfg.Color, 14, 1.6)
+	local gui = self:billboard(orb, 5, 3.4, 3.6, 140)
+	self:label(gui, cfg.Icon, WHITE, UDim2.new(0, 0, 0, 0), UDim2.new(1, 0, 0.62, 0))
+	self:label(gui, cfg.Name, cfg.Color, UDim2.new(0, 0, 0.64, 0), UDim2.new(1, 0, 0.36, 0))
+	return orb
+end
+
+-- A floor pad that gives a short burst of a power-up every time you cross it.
+function Kit:boostPad(x, z, kind, duration)
+	local cfg = Config.PowerUps[kind]
+	self.pickupCount = self.pickupCount + 1
+	local pad = self:block(5, 0.3, 4, x, 0.15, z, cfg.Color, Mat.Neon, { CanCollide = false, CastShadow = false })
+	pad.Name = "BoostPad"
+	pad:SetAttribute("Kind", kind)
+	pad:SetAttribute("Id", self.pickupCount)
+	pad:SetAttribute("Duration", duration or 2.5)
+	pad:SetAttribute("Pad", true)
+	tag(pad, "PowerUp")
+	for i = -1, 1 do
+		self:deco(3.4, 0.1, 0.5, x, 0.34, z + i * 1.2, WHITE, Mat.Neon)
+	end
+	return pad
+end
+
+-- A trampoline pad that launches the player upward.
+function Kit:bounce(x, z, power, diameter)
+	diameter = diameter or 5
+	self:cyl(diameter + 0.8, 0.2, x, 0.1, z, DARK, Mat.Metal).Name = "BounceBase"
+	local pad = self:cyl(diameter, 0.3, x, 0.35, z, RGB(255, 80, 170), Mat.Neon)
+	pad.Name = "BouncePad"
+	pad:SetAttribute("Power", power)
+	tag(pad, "Bounce")
+	return pad
+end
+
+----------------------------------------------------------------------
+-- Checkpoints
+----------------------------------------------------------------------
+
+-- An archway over a checkpoint announcing the zone (or the finish line).
+function Kit:gate(radius, text, color)
+	local t = self.theme
+	local span = radius + 2.5
+	for _, side in ipairs({ -1, 1 }) do
+		self:block(2.6, 19, 2.6, side * span, 8.5, 0, t.Post, t.PostMat or Mat.Metal).Name = "GatePillar"
+		self:deco(2.9, 0.5, 2.9, side * span, 15.5, 0, color, Mat.Neon)
+		self:deco(2.9, 0.5, 2.9, side * span, 3, 0, color, Mat.Neon)
+	end
+	local beam = self:block(span * 2 + 6, 3.6, 2.4, 0, 19.6, 0, t.Post, t.PostMat or Mat.Metal)
+	beam.Name = "GateSign"
+	self:surfaceText(beam, text, color)
+	self:deco(span * 2 + 6.4, 0.4, 2.7, 0, 21.6, 0, color, Mat.Neon)
+	self:deco(span * 2 + 6.4, 0.4, 2.7, 0, 17.6, 0, color, Mat.Neon)
+end
+
+--[[
+	Build the next checkpoint: a round dais with a spawn pad, a trigger that
+	the server listens to, lamps that light up once it has been reached, and
+	a floating sign. Afterwards the cursor sits on the far rim, turned to face
+	the next stage.
+]]
+function Kit:checkpoint(o)
+	o = o or {}
+	self.stage = self.stage + 1
+	local index = self.stage
+	local info = Config.Stages[index]
+	local isFinish = index == Config.FinishIndex
+	local zoneIndex = Config.zoneOf(index)
+	local zone = Config.Zones[zoneIndex]
+	local previous = Config.Stages[index - 1]
+	local newZone = index == 1 or (previous ~= nil and previous.Zone ~= zoneIndex)
+
+	self.theme = self.themes[zoneIndex]
+	local t = self.theme
+	self.folder = make("Folder", { Name = string.format("Stage%02d", index) }, self.root)
+	self.trail = {}
+
+	local radius = o.radius or ((newZone or isFinish) and 13 or 8)
+	local centre = self:w(0, 0, radius - 1)
+	local turn = (info and info.Turn) or 0
+	local facing = centre * CFrame.Angles(0, -rad(turn), 0)
+
+	self:push()
+	self.cf = centre
+
+	-- the dais (its top is 0.2 above the path so nothing z-fights)
+	local dais = self:cyl(radius * 2, 1.7, 0, -0.65, 0, t.Plaza or t.Floor, t.PlazaMat or t.FloorMat)
+	dais.Name = "Checkpoint"
+	self:decoCyl(radius * 2 + 0.7, 0.5, 0, -0.75, 0, zone.Color, Mat.Neon)
+	self:decoCyl(radius * 1.5, 2.4, 0, -2.7, 0, t.Body, t.BodyMat)
+	self:decoCyl(radius * 0.8, 2.2, 0, -5, 0, t.Body2 or t.Body, t.BodyMat)
+
+	-- glowing pad the player spawns on
+	local pad = self:cyl(7, 0.2, 0, 0.3, 0, WHITE, Mat.Neon, { CanCollide = false, CastShadow = false })
+	pad.Name = "Pad"
+	pad:SetAttribute("Stage", index)
+	tag(pad, "CheckpointLight")
+
+	self.cf = facing
+	local spawn = self:newPart("SpawnLocation", {
+		Size = V3(5, 0.2, 5),
+		CFrame = self:w(0, 0.5, 0),
+		Transparency = 1,
+		CanCollide = false,
+		CanQuery = false,
+		Neutral = true,
+		Duration = 0,
+		Enabled = true,
+	})
+	spawn.Name = "Spawn"
+	self.cf = centre
+
+	-- trigger volume
+	local trigger = self:block(radius * 2 - 1, 12, radius * 2 - 1, 0, 6.2, 0, WHITE, Mat.SmoothPlastic, {
+		Transparency = 1,
+		CanCollide = false,
+		CanQuery = false,
+		CanTouch = true,
+		CastShadow = false,
+	})
+	trigger.Name = "Trigger"
+	trigger:SetAttribute("Stage", index)
+	tag(trigger, "Checkpoint")
+
+	-- lamp posts
+	for _, side in ipairs({ -1, 1 }) do
+		self:block(0.8, 7.4, 0.8, side * (radius - 1.4), 3.9, 0, t.Post, t.PostMat or Mat.Metal).Name = "LampPost"
+		local orb = self:ball(1.8, side * (radius - 1.4), 8.2, 0, WHITE, Mat.Neon, { CanCollide = false, CastShadow = false })
+		orb.Name = "Lamp"
+		orb:SetAttribute("Stage", index)
+		tag(orb, "CheckpointLight")
+		self:light(orb, zone.Color, 16, 1.2)
+	end
+
+	-- floating sign
+	local gui = self:billboard(pad, 16, 8, 12, 260)
+	local title
+	if isFinish then
+		title = "🏁 FINISH"
+	elseif index == 1 then
+		title = "START"
+	else
+		title = tostring(index)
+	end
+	self:label(gui, title, zone.Color, UDim2.new(0, 0, 0, 0), UDim2.new(1, 0, 0.56, 0))
+	if info then
+		self:label(gui, info.Name, WHITE, UDim2.new(0, 0, 0.56, 0), UDim2.new(1, 0, 0.24, 0))
+		self:label(gui, info.Tip, RGB(200, 210, 240), UDim2.new(0, 0, 0.82, 0), UDim2.new(1, 0, 0.18, 0), Config.UI.FontBody)
+	else
+		self:label(gui, "You beat " .. Config.GameName .. "!", WHITE, UDim2.new(0, 0, 0.58, 0), UDim2.new(1, 0, 0.26, 0))
+	end
+
+	if isFinish then
+		self:gate(radius, "🏆  FINISH  🏆", GOLD)
+	elseif newZone then
+		self:gate(radius, "ZONE " .. zoneIndex .. "  ·  " .. string.upper(zone.Name), zone.Color)
+	end
+
+	self:pop()
+
+	self.checkpoints[index] = {
+		Index = index,
+		Spawn = spawn,
+		Trigger = trigger,
+		CFrame = facing,
+		Radius = radius,
+		Folder = self.folder,
+	}
+
+	-- step out to the rim (just inside it, a touch lower) facing the next stage
+	self.cf = facing * CFrame.new(0, 0, -(radius - 1))
+	self:mark(radius, -(radius - 1))
+	return self.checkpoints[index]
+end
+
+return Kit
+]]></ProtectedString></Properties></Item>
+<Item class="Folder" referent="RBX18"><Properties><string name="Name">Zones</string></Properties><Item class="ModuleScript" referent="RBX13"><Properties><string name="Name">Frost</string><ProtectedString name="Source"><![CDATA[-- Zone 3 · Frostbite Peaks: ice, conveyors, bounce pads and crushers.
+
+local Decor = require(script.Parent.Parent.Decor)
+
+local RGB = Color3.fromRGB
+local Mat = Enum.Material
+
+local Zone = {}
+
+Zone.Theme = {
+	Style = "ice",
+	Thick = 1.5,
+	Floor = RGB(238, 246, 255),
+	FloorMat = Mat.Snow,
+	Body = RGB(140, 195, 235),
+	BodyMat = Mat.Glacier,
+	Body2 = RGB(120, 180, 230),
+	Plaza = RGB(214, 230, 246),
+	PlazaMat = Mat.Marble,
+	Accent = RGB(120, 220, 255),
+	Accent2 = RGB(200, 240, 255),
+	Mover = RGB(90, 150, 215),
+	MoverMat = Mat.Ice,
+	Vanish = RGB(190, 220, 240),
+	VanishMat = Mat.Ice,
+	Ladder = RGB(90, 200, 255),
+	Hazard = RGB(255, 50, 100),
+	Post = RGB(70, 90, 120),
+	PostMat = Mat.Metal,
+}
+
+local Stages = {}
+Zone.Stages = Stages
+
+function Stages.SlipNSlide(K)
+	K:floor(5, 8)
+	K:ice(20, 7)
+	K:coins(3, 0, 3.5, -15, 0, 0, 5)
+	K:fwd(4)
+	K:ice(14, 6, { x = 2 })
+	K:fwd(4.5)
+	K:ice(12, 5, { x = -2 })
+	K:coin(-2, 3.5, -6)
+	K:fwd(4.5)
+	K:ice(10, 4.5, { x = 1 })
+	K:fwd(5)
+	K:ice(8, 4)
+	K:coin(0, 3.5, -4)
+	K:hop(4, 0, 5, 6)
+	K:fwd(4)
+end
+
+function Stages.ConveyorChaos(K)
+	K:floor(5, 8)
+	K:conveyor(22, 6, 0, -9)
+	K:coins(3, 0, 3.5, -17, 0, 0, 6)
+	K:hop(3, 0, 4, 6)
+	K:conveyor(20, 8, 9, 0)
+	K:kill(0.8, 2.5, 20, 4.9, 1.25, -10)
+	K:coin(-2, 3.5, -10)
+	K:hop(3, 0, 4, 6)
+	K:conveyor(20, 8, -9, 0)
+	K:kill(0.8, 2.5, 20, -4.9, 1.25, -10)
+	K:kill(8, 1, 1, 0, 0.6, -13)
+	K:kill(8, 1, 1, 0, 0.6, -6)
+	K:hop(3, 0, 4, 6)
+	K:conveyor(18, 6, 0, 13)
+	K:coins(2, 0, 3.5, -12, 0, 0, 6)
+	K:hop(6.5, 0, 6, 8)
+	K:fwd(4)
+end
+
+function Stages.IcicleGauntlet(K)
+	local t = K.theme
+	K:floor(9, 8)
+	K:powerup("Shield", 0, 3, -3)
+	K:floor(34, 6)
+	for i = 0, 8 do
+		local z = -31 + i * 3.5
+		K:kill(6, 6.5, 0.5, 0, 3.25, z, { Transparency = 0.35, Name = "IceCurtain" })
+		K:deco(0.6, 7, 0.8, -3.3, 3.5, z, t.Post, Mat.Metal)
+		K:deco(0.6, 7, 0.8, 3.3, 3.5, z, t.Post, Mat.Metal)
+	end
+	K:floor(7, 8)
+	K:coins(3, -2.5, 3.5, -3.5, 2.5, 0, 0)
+	K:fwd(4)
+end
+
+function Stages.BouncyGlaciers(K)
+	K:floor(8, 8)
+	K:bounce(0, -3, 90)
+	K:cliff(14, 8)
+	K:floor(8, 8)
+	K:coin(0, 3.5, -4)
+	for i = 1, 3 do
+		K:fwd((i == 1) and 5 or 8)
+		K:floor(5, 5, { stay = true })
+		K:bounce(0, 2.5, 75, 4.6)
+		K:coin(0, 12, 2.5)
+		K:fwd(5)
+	end
+	K:fwd(8)
+	K:floor(8, 8)
+	K:bounce(0, -3, 95)
+	K:cliff(16, 8)
+	K:floor(8, 8)
+	K:coins(2, -2, 3.5, -4, 4, 0, 0)
+	K:fwd(4)
+end
+
+function Stages.CrusherHall(K)
+	K:floor(6, 8)
+	K:floor(46, 8)
+	for i = 1, 4 do
+		K:crusher(-38 + (i - 1) * 9.5, { phase = (i - 1) * 0.23 + 0.1, period = 3.4 })
+	end
+	K:coins(3, 0, 3, -33.25, 0, 0, 9.5)
+	K:fwd(4)
+end
+
+function Stages.SpikeballAlley(K)
+	local t = K.theme
+	K:floor(6, 8)
+	K:floor(20, 4.5)
+	K:ice(24, 4.5)
+	K:floor(20, 4.5)
+	for i = 1, 6 do
+		local z = -57 + (i - 1) * 10
+		local ball = K:killBall(4.6, -10, 2.4, z)
+		K:mover(ball, 20, 0, 0, 2.6 + (i % 3) * 0.5, (i * 0.37) % 1)
+		K:deco(24, 0.2, 0.8, 0, -0.1, z, t.Accent, Mat.Neon, { Transparency = 0.5 })
+		if i < 6 then
+			K:coin(0, 3.5, z + 5)
+		end
+	end
+	K:fwd(4)
+end
+
+function Zone.Backdrop(K)
+	local snow = RGB(232, 240, 250)
+	Decor.peak(K, -200, -160, 140, 170, 280, snow, Mat.Snow)
+	Decor.peak(K, 210, -170, 330, 190, 320, snow, Mat.Snow)
+	Decor.peak(K, -190, -150, 520, 150, 250, snow, Mat.Snow)
+	-- aurora ribbons
+	for i = 1, 3 do
+		local anchor = K:deco(1, 1, 1, 0, 150 + i * 14, 80 + i * 150, snow, Mat.SmoothPlastic, { Transparency = 1 })
+		local a0 = K.make("Attachment", { Position = Vector3.new(-260, 0, 0) }, anchor)
+		local a1 = K.make("Attachment", { Position = Vector3.new(260, 0, 0) }, anchor)
+		K.make("Beam", {
+			Attachment0 = a0,
+			Attachment1 = a1,
+			Width0 = 70,
+			Width1 = 70,
+			CurveSize0 = 90,
+			CurveSize1 = -90,
+			Segments = 24,
+			FaceCamera = true,
+			LightEmission = 1,
+			Color = ColorSequence.new(RGB(80, 255, 170), RGB(160, 110, 255)),
+			Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 1),
+				NumberSequenceKeypoint.new(0.5, 0.55),
+				NumberSequenceKeypoint.new(1, 1),
+			}),
+		}, anchor)
+	end
+end
+
+function Zone.Scatter(K, x)
+	local rng = K.rng
+	Decor.iceIslet(K, x, rng:NextNumber(-12, 3), 0, rng:NextNumber(5, 8))
+end
+
+return Zone
+]]></ProtectedString></Properties></Item>
+<Item class="ModuleScript" referent="RBX14"><Properties><string name="Name">Magma</string><ProtectedString name="Source"><![CDATA[-- Zone 2 · Magma Caverns: lava floors, crumbling tiles and fire.
+
+local Decor = require(script.Parent.Parent.Decor)
+
+local RGB = Color3.fromRGB
+local Mat = Enum.Material
+
+local Zone = {}
+
+Zone.Theme = {
+	Style = "basalt",
+	Thick = 1.5,
+	Floor = RGB(70, 64, 70),
+	FloorMat = Mat.Basalt,
+	Body = RGB(46, 42, 48),
+	BodyMat = Mat.Slate,
+	Body2 = RGB(36, 32, 38),
+	Plaza = RGB(88, 78, 80),
+	PlazaMat = Mat.Cobblestone,
+	Accent = RGB(255, 130, 30),
+	Accent2 = RGB(255, 200, 60),
+	Mover = RGB(150, 96, 70),
+	MoverMat = Mat.CorrodedMetal,
+	Vanish = RGB(170, 110, 70),
+	VanishMat = Mat.CrackedLava,
+	Ladder = RGB(255, 170, 60),
+	Hazard = RGB(255, 50, 40),
+	Lava = RGB(255, 96, 20),
+	Post = RGB(40, 38, 46),
+	PostMat = Mat.Metal,
+}
+
+local Stages = {}
+Zone.Stages = Stages
+
+function Stages.HotFeet(K)
+	local t = K.theme
+	K:floor(5, 8)
+	K:lavaSea(106, 56, 5)
+	local hops = {
+		{ 4, 0, 5, 0 },
+		{ 4.5, 1, 4, 3 },
+		{ 4.5, 1, 4, -2 },
+		{ 5, -1, 4, 2 },
+		{ 5, 0, 4, -3 },
+		{ 5, 1, 4, 0 },
+		{ 5.5, 0, 3.5, 3 },
+		{ 5, -1, 4, -1 },
+		{ 4, 0, 6, 0 },
+	}
+	for i, h in ipairs(hops) do
+		K:hop(h[1], h[2], h[3], h[3], { x = h[4] })
+		K:deco(h[3] - 1.4, 9, h[3] - 1.4, h[4], -8.5, -h[3] / 2, t.Body2, t.BodyMat)
+		if i % 2 == 0 then
+			K:coin(h[4], 3.5, -h[3] / 2)
+		end
+	end
+	K:fwd(4)
+end
+
+function Stages.CrumbleBridge(K)
+	K:floor(5, 8)
+	K:lavaSea(136, 56, 6)
+	for i = 1, 8 do
+		K:fwd(0.5)
+		K:vanish(5, 6, 0)
+		if i % 3 == 0 then
+			K:coin(0, 3.5, -2.5)
+		end
+	end
+	K:hop(3, 0, 5, 6)
+	for i = 1, 6 do
+		K:fwd(4)
+		local x = (i % 2 == 0) and 2.5 or -2.5
+		K:vanish(4.5, 4.5, x, { delay = 0.8 })
+		if i % 2 == 0 then
+			K:coin(x, 3.5, -2.25)
+		end
+	end
+	K:hop(4, 0, 5, 6)
+	K:fwd(4)
+end
+
+function Stages.MegaJumpCliffs(K)
+	K:floor(12, 10)
+	K:powerup("Jump", 0, 3, -5)
+	for _ = 1, 3 do
+		K:cliff(13, 10)
+		K:floor(11, 10)
+		K:powerup("Jump", 0, 3, -4)
+		K:coin(-3, 3.5, -8)
+		K:coin(3, 3.5, -8)
+	end
+	K:fwd(4)
+end
+
+function Stages.FireJets(K)
+	K:floor(6, 8)
+	K:lavaSea(84, 56, 6)
+	K:floor(58, 6)
+	for i = 1, 7 do
+		local z = -52 + (i - 1) * 7.5
+		K:jet(z, 6, 1.3, 1.7, (-(i - 1) * 0.14) % 1)
+		if i < 7 then
+			K:coin(0, 3.5, z + 3.75)
+		end
+	end
+	K:fwd(4)
+end
+
+function Stages.LavaFerry(K)
+	K:floor(7, 10)
+	K:lavaSea(114, 56, 6)
+	K:fwd(2)
+	K:mover(K:slab(8, 8, 0, 0, 4), 0, 0, 66, 24, 0, "hold")
+	K:kill(10, 1, 1, 0, 0.9, 16)
+	K:kill(5.5, 6, 1, -2.75, 3, 27)
+	K:kill(5.5, 6, 1, 2.75, 3, 37)
+	K:kill(10, 1, 1, 0, 0.9, 47)
+	K:kill(5.5, 6, 1, -2.75, 3, 56)
+	K:kill(10, 1, 1, 0, 0.9, 64)
+	K:coin(2.5, 4, 27)
+	K:coin(-2.5, 4, 37)
+	K:coin(0, 6.5, 47)
+	K:coin(2.5, 4, 56)
+	K:fwd(74)
+	K:hop(2, 0, 8, 10)
+	K:fwd(4)
+end
+
+function Stages.PendulumPass(K)
+	K:floor(6, 8)
+	K:lavaSea(92, 56, 8)
+	K:floor(50, 5)
+	for i = 1, 4 do
+		K:pendulum(-42 + (i - 1) * 10, { phase = (i - 1) * 0.27, base = -8 })
+	end
+	K:coins(3, 0, 3.5, -37, 0, 0, 10)
+	K:ladder(14, 8)
+	K:floor(8, 8)
+	K:coin(0, 3.5, -4)
+	K:fwd(4)
+end
+
+function Zone.Backdrop(K)
+	local rock = RGB(44, 38, 42)
+	Decor.peak(K, -190, -130, 160, 150, 230, rock, Mat.Basalt, RGB(255, 110, 20))
+	Decor.peak(K, 200, -150, 380, 170, 260, rock, Mat.Basalt, RGB(255, 110, 20))
+	Decor.peak(K, -170, -140, 560, 130, 200, rock, Mat.Basalt, RGB(255, 110, 20))
+end
+
+function Zone.Scatter(K, x)
+	local rng = K.rng
+	Decor.spire(K, x, -14, 0, rng:NextNumber(5, 9), rng:NextNumber(16, 34))
+end
+
+return Zone
+]]></ProtectedString></Properties></Item>
+<Item class="ModuleScript" referent="RBX15"><Properties><string name="Name">Meadows</string><ProtectedString name="Source"><![CDATA[-- Zone 1 · Sunny Meadows: the gentle tutorial zone.
+
+local Decor = require(script.Parent.Parent.Decor)
+
+local RGB = Color3.fromRGB
+local Mat = Enum.Material
+
+local Zone = {}
+
+Zone.Theme = {
+	Style = "island",
+	Thick = 1.5,
+	Floor = RGB(98, 190, 86),
+	FloorMat = Mat.Grass,
+	Body = RGB(134, 98, 72),
+	BodyMat = Mat.Ground,
+	Body2 = RGB(112, 90, 76),
+	Plaza = RGB(222, 204, 170),
+	PlazaMat = Mat.Cobblestone,
+	Accent = RGB(255, 214, 64),
+	Accent2 = RGB(255, 150, 60),
+	Mover = RGB(232, 170, 84),
+	MoverMat = Mat.WoodPlanks,
+	Vanish = RGB(200, 160, 110),
+	VanishMat = Mat.Cobblestone,
+	Ladder = RGB(250, 205, 80),
+	Hazard = RGB(255, 56, 66),
+	Post = RGB(122, 86, 60),
+	PostMat = Mat.Wood,
+}
+
+local Stages = {}
+Zone.Stages = Stages
+
+function Stages.FirstSteps(K)
+	K:hop(4, 0, 7, 7)
+	K:coin(0, 3.5, -3.5)
+	K:hop(4, 1, 6, 6, { x = 3 })
+	K:coin(3, 3.5, -3)
+	K:hop(4.5, 1, 6, 6, { x = -3 })
+	K:coin(-3, 3.5, -3)
+	K:hop(5, 0, 6, 6, { x = 2 })
+	K:hop(5, 1, 5, 5, { x = -2 })
+	K:coin(-2, 3.5, -2.5)
+	K:hop(5.5, 0, 5, 5)
+	K:coin(0, 5.5, 2.5)
+	K:fwd(4.5)
+end
+
+function Stages.LadderCliffs(K)
+	K:floor(8, 8)
+	K:ladder(10)
+	K:floor(8, 8)
+	K:coin(0, 3.5, -4)
+	K:hop(4, 0, 6, 6)
+	-- a hanging ladder: jump across and grab on
+	K:fwd(3)
+	K:truss(14, 0, -4, 1)
+	K:coins(3, 2.6, 1, 1, 0, 3.5, 0)
+	K:move(0, 10, 2)
+	K:hop(3, 0, 7, 7)
+	K:coin(0, 3.5, -3.5)
+	K:hop(4.5, 0, 5, 8)
+	K:ladder(16)
+	K:floor(7, 8)
+	K:coins(2, -3, 3.5, -3.5, 6, 0, 0)
+	K:fwd(4)
+end
+
+function Stages.SlidingStones(K)
+	K:floor(7, 8)
+	-- a block sliding side to side
+	K:fwd(3)
+	K:mover(K:slab(6, 6, -7, 0, 3), 14, 0, 0, 5, 0)
+	K:coin(0, 4, 3)
+	K:fwd(6)
+	K:hop(3, 0, 5, 6)
+	-- a ferry across a wide gap
+	K:fwd(2)
+	K:mover(K:slab(6, 6, 0, 0, 3), 0, 0, 16, 6.5, 0, "hold")
+	K:coins(3, 0, 4.5, 8, 0, 0, 5)
+	K:fwd(22)
+	K:hop(2, 0, 6, 6)
+	-- a lift
+	K:fwd(2)
+	K:mover(K:slab(6, 6, 0, 0, 3), 0, 10, 0, 6.5, 0.5, "hold")
+	K:move(0, 10, 6)
+	K:hop(2, 0, 6, 8)
+	K:coin(0, 3.5, -3)
+	-- two sliders crossing each other
+	K:fwd(3)
+	K:mover(K:slab(5, 5, -6, 0, 2.5), 12, 0, 0, 4.5, 0)
+	K:fwd(8)
+	K:mover(K:slab(5, 5, 6, 0, 2.5), -12, 0, 0, 4.5, 0)
+	K:coin(0, 4, 2.5)
+	K:fwd(5)
+	K:hop(3, 0, 5, 6)
+	K:fwd(4)
+end
+
+function Stages.TurboRunway(K)
+	K:floor(36, 8)
+	for _, z in ipairs({ -28, -20, -12 }) do
+		K:kill(8, 1.2, 1, 0, 0.6, z)
+	end
+	K:coins(3, 0, 5.5, -28, 0, 0, 8)
+	K:powerup("Speed", 0, 3, -5)
+	K:hop(13, 0, 10, 8)
+	K:powerup("Speed", 0, 3, -5)
+	K:coin(0, 6, -16.5)
+	K:hop(13, 0, 9, 8)
+	K:powerup("Speed", 0, 3, -4.5)
+	K:hop(12, 1, 8, 8)
+	K:coins(2, -2, 3.5, -4, 4, 0, 0)
+	K:fwd(4)
+end
+
+function Stages.SpinCycle(K)
+	local t = K.theme
+	K:floor(5, 8)
+	local specs = { { 1.5, false }, { -2, false }, { 1.3, true } }
+	for _, spec in ipairs(specs) do
+		K:fwd(4)
+		K:cyl(16, 1.5, 0, -0.75, 8, t.Floor, t.FloorMat).Name = "Platform"
+		K:decoCyl(12, 2.6, 0, -2.8, 8, t.Body, t.BodyMat)
+		K:mark(8, 8)
+		K:spinner(8, 15, spec[1], { cross = spec[2] })
+		K:coin(5, 3.5, 8)
+		K:coin(-5, 3.5, 8)
+		K:fwd(16)
+	end
+	K:fwd(4)
+end
+
+function Stages.SkylineBeams(K)
+	local wood = RGB(196, 140, 84)
+	K:floor(5, 8)
+	K:hop(2, 0, 18, 2, { bare = true, color = wood, material = Mat.WoodPlanks })
+	K:coins(3, 0, 3.5, -14, 0, 0, 5)
+	K:hop(3, 0, 5, 5)
+	K:hop(2, 0, 14, 1.6, { bare = true, color = wood, material = Mat.WoodPlanks, x = -1.5 })
+	K:floor(14, 1.6, { bare = true, color = wood, material = Mat.WoodPlanks, x = 1.5 })
+	K:coin(1.5, 3.5, -7)
+	K:hop(3, 0, 5, 5)
+	-- a beam that slides sideways
+	K:fwd(3)
+	K:mover(K:slab(14, 2, -4, 0, 7, { color = wood, material = Mat.WoodPlanks }), 8, 0, 0, 5, 0)
+	K:fwd(14)
+	K:hop(3, 0, 6, 8)
+	K:push()
+	Decor.windmill(K, 26, -14, -30)
+	K:pop()
+	-- lift up to the next zone
+	K:fwd(2)
+	K:mover(K:slab(7, 7, 0, 0, 3.5), 0, 16, 0, 8, 0, "hold")
+	K:move(0, 16, 7)
+	K:fwd(2)
+end
+
+function Zone.Backdrop(K)
+	local rng = K.rng
+	-- lobby dressing
+	Decor.islet(K, -24, -3, -4, 8)
+	Decor.islet(K, 24, -2, -18, 9)
+	local board = K:block(24, 8, 1, 0, 9, -30, RGB(150, 104, 66), Mat.WoodPlanks)
+	board.Name = "WelcomeBoard"
+	K:surfaceText(board, "BOBUX OBBY", RGB(255, 214, 64))
+	K:deco(1, 10, 1, -10, 1, -30, RGB(122, 86, 60), Mat.Wood)
+	K:deco(1, 10, 1, 10, 1, -30, RGB(122, 86, 60), Mat.Wood)
+	for i = 1, 12 do
+		local side = (i % 2 == 0) and 1 or -1
+		Decor.cloud(K, side * rng:NextNumber(70, 220), rng:NextNumber(-50, 60), i * 50, rng:NextNumber(1.5, 3.5))
+	end
+	for i = 1, 4 do
+		local side = (i % 2 == 0) and 1 or -1
+		Decor.islet(K, side * rng:NextNumber(150, 210), rng:NextNumber(-30, 30), 60 + i * 120, rng:NextNumber(26, 40))
+	end
+end
+
+function Zone.Scatter(K, x)
+	local rng = K.rng
+	Decor.islet(K, x, rng:NextNumber(-12, 3), 0, rng:NextNumber(5, 8))
+	if rng:NextNumber() < 0.4 then
+		Decor.cloud(K, x * 1.8, rng:NextNumber(-34, -16), rng:NextNumber(-10, 10), rng:NextNumber(0.8, 1.6))
+	end
+end
+
+return Zone
+]]></ProtectedString></Properties></Item>
+<Item class="ModuleScript" referent="RBX16"><Properties><string name="Name">Neon</string><ProtectedString name="Source"><![CDATA[-- Zone 4 · Neon City: lasers, boost pads and spinning rides.
+
+local Decor = require(script.Parent.Parent.Decor)
+
+local RGB = Color3.fromRGB
+local Mat = Enum.Material
+
+local Zone = {}
+
+Zone.Theme = {
+	Style = "tech",
+	Thick = 1.2,
+	Floor = RGB(40, 42, 66),
+	FloorMat = Mat.DiamondPlate,
+	Body = RGB(20, 20, 34),
+	BodyMat = Mat.Metal,
+	Body2 = RGB(16, 16, 28),
+	Plaza = RGB(52, 50, 84),
+	PlazaMat = Mat.Metal,
+	Accent = RGB(0, 240, 230),
+	Accent2 = RGB(255, 0, 200),
+	Mover = RGB(96, 70, 190),
+	MoverMat = Mat.Metal,
+	Vanish = RGB(255, 220, 60),
+	VanishMat = Mat.Glass,
+	Ladder = RGB(0, 240, 230),
+	Hazard = RGB(255, 30, 70),
+	Post = RGB(28, 28, 46),
+	PostMat = Mat.Metal,
+}
+
+local Stages = {}
+Zone.Stages = Stages
+
+function Stages.LaserGrid(K)
+	local t = K.theme
+	K:floor(6, 8)
+	K:floor(48, 12)
+	for _, z in ipairs({ -40, -30, -20, -10 }) do
+		K:kill(12.4, 0.5, 0.5, 0, 7.5, z, { Name = "HighLaser" })
+		K:deco(0.6, 8.2, 0.6, -6.5, 4, z, t.Post, Mat.Metal)
+		K:deco(0.6, 8.2, 0.6, 6.5, 4, z, t.Post, Mat.Metal)
+	end
+	K:mover(K:kill(12.4, 0.6, 0.6, 0, 0.8, -44, { Name = "SweepLaser" }), 0, 0, 18, 5, 0)
+	K:mover(K:kill(12.4, 0.6, 0.6, 0, 0.8, -6, { Name = "SweepLaser" }), 0, 0, -18, 5.6, 0.3)
+	K:mover(K:kill(1, 7, 1, -5, 3.5, -35, { Name = "Pylon" }), 10, 0, 0, 4, 0)
+	K:mover(K:kill(1, 7, 1, 5, 3.5, -15, { Name = "Pylon" }), -10, 0, 0, 4.4, 0.5)
+	K:coins(4, -3, 3, -35, 2, 0, 8)
+	K:fwd(4)
+end
+
+function Stages.BoostBoulevard(K)
+	K:floor(14, 8)
+	K:boostPad(0, -7, "Speed", 2.5)
+	for i = 1, 4 do
+		K:hop(12.5 + ((i > 2) and 0.5 or 0), (i == 3) and 1 or 0, 14, 7)
+		if i < 4 then
+			K:boostPad(0, -7, "Speed", 2.5)
+		end
+		K:coin(0, 6, -20)
+	end
+	K:fwd(4)
+end
+
+function Stages.Carousel(K)
+	local t = K.theme
+	K:floor(6, 8)
+	K:fwd(3)
+	-- turntable with deadly posts riding on it
+	local disc = K:cyl(26, 1.5, 0, -0.75, 13, t.Mover, t.MoverMat)
+	disc.Name = "Turntable"
+	K:rotor(disc, 0, -0.75, 13, 0, 1, 0, 0.7)
+	K:mark(19, 13)
+	for i = 0, 2 do
+		local a = i * math.pi * 2 / 3
+		local post = K:kill(1.6, 7, 1.6, math.sin(a) * 8, 3.5, 13 + math.cos(a) * 8)
+		K:rotor(post, 0, 3.5, 13, 0, 1, 0, 0.7)
+	end
+	K:cyl(3, 3, 0, 1.5, 13, t.Post, Mat.Metal).Name = "Hub"
+	K:coin(-6, 3.5, 13)
+	K:coin(6, 3.5, 13)
+	K:fwd(26)
+	K:hop(3, 0, 5, 6)
+	-- ring of orbiting platforms
+	K:fwd(3)
+	local R = 13
+	local cz = 3.25 + R
+	K:decoCyl(5, 34, 0, 2, cz, t.Post, Mat.Metal)
+	K:decoCyl(6, 0.6, 0, 8, cz, t.Accent, Mat.Neon)
+	K:decoCyl(6, 0.6, 0, 14, cz, t.Accent2, Mat.Neon)
+	K:rotor(K:deco(0.6, 0.4, R * 2 - 6, 0, -1, cz, t.Accent, Mat.Neon), 0, -1, cz, 0, 1, 0, 0.55)
+	K:rotor(K:deco(R * 2 - 6, 0.4, 0.6, 0, -1, cz, t.Accent, Mat.Neon), 0, -1, cz, 0, 1, 0, 0.55)
+	for i = 0, 3 do
+		local a = i * math.pi / 2
+		local plat = K:cyl(6.5, 1.2, math.sin(a) * R, -0.6, cz - math.cos(a) * R, t.Mover, t.MoverMat)
+		plat.Name = "OrbitPlatform"
+		K:rotor(plat, 0, -0.6, cz, 0, 1, 0, 0.55)
+	end
+	K:mark(R + 4, cz)
+	K:coin(0, 4, cz - R)
+	K:coin(0, 4, cz + R)
+	K:fwd(6.5 + R * 2)
+	K:hop(3, 0, 6, 8)
+	K:fwd(4)
+end
+
+function Stages.DoubleTrouble(K)
+	K:floor(9, 8)
+	K:powerup("DoubleJump", 0, 3, -4)
+	K:hop(13, 0, 8, 7)
+	K:powerup("DoubleJump", 0, 3, -4)
+	K:coin(0, 8, -14.5)
+	K:hop(13, 2, 8, 7)
+	K:powerup("DoubleJump", 0, 3, -4)
+	K:coin(0, 8, -14.5)
+	K:hop(6, 8, 8, 7)
+	K:powerup("DoubleJump", 0, 3, -4)
+	K:hop(14, 0, 9, 8)
+	K:coins(2, -2, 3.5, -4.5, 4, 0, 0)
+	K:fwd(4)
+end
+
+function Stages.LadderLasers(K)
+	local t = K.theme
+	K:floor(6, 8)
+	K:ladder(12)
+	K:floor(7, 8)
+	K:coin(0, 3.5, -3.5)
+	K:ladder(18)
+	for i, y in ipairs({ -13, -5 }) do
+		K:laser(7, 0.5, 3.4, 0, y, -1.2, 1.2, 1.6, (i - 1) * 0.5)
+		K:deco(0.8, 1, 1, -3.9, y, -1.2, t.Post, Mat.Metal)
+		K:deco(0.8, 1, 1, 3.9, y, -1.2, t.Post, Mat.Metal)
+	end
+	K:floor(7, 8)
+	K:fwd(3)
+	K:truss(12, 0, -2, 1)
+	K:move(0, 10, 2)
+	K:fwd(3)
+	K:truss(12, 0, -6, 1)
+	K:coins(2, 2.6, -3, 1, 0, 4, 0)
+	K:move(0, 6, 2)
+	K:hop(3, 0, 7, 8)
+	K:fwd(4)
+end
+
+function Stages.NeonRush(K)
+	K:floor(6, 8)
+	for i = 1, 5 do
+		K:fwd(3)
+		if i > 1 then
+			K:laser(20, 6, 0.4, 0, 3, -1.5, 1, 2, (i * 0.31) % 1)
+		end
+		local dir = (i % 2 == 0) and 1 or -1
+		K:mover(K:slab(5, 6, dir * 6, 0, 2.5), -dir * 12, 0, 0, 5, 0)
+		if i % 2 == 1 then
+			K:coin(0, 4, 2.5)
+		end
+		K:fwd(5)
+	end
+	K:hop(3, 0, 5, 6)
+	for i = 1, 5 do
+		K:fwd(3.5)
+		K:vanish(4, 4, (i % 2 == 0) and 2 or -2, { delay = 0.7 })
+	end
+	K:hop(3.5, 0, 5, 6)
+	K:fwd(4)
+end
+
+function Zone.Backdrop(K)
+	local rng = K.rng
+	for i = 1, 14 do
+		local side = (i % 2 == 0) and 1 or -1
+		Decor.building(K, side * rng:NextNumber(120, 200), rng:NextNumber(60, 200), i * 40, rng:NextNumber(26, 44), rng:NextNumber(26, 44))
+	end
+end
+
+function Zone.Scatter(K, x)
+	local rng = K.rng
+	Decor.building(K, x + ((x > 0) and 4 or -4), rng:NextNumber(-6, 36), 0, rng:NextNumber(10, 17), rng:NextNumber(10, 17))
+end
+
+return Zone
+]]></ProtectedString></Properties></Item>
+<Item class="ModuleScript" referent="RBX17"><Properties><string name="Name">Starlight</string><ProtectedString name="Source"><![CDATA[-- Zone 5 · Starlight Sanctum: the finale among the stars.
+
+local Decor = require(script.Parent.Parent.Decor)
+
+local RGB = Color3.fromRGB
+local Mat = Enum.Material
+
+local Zone = {}
+
+Zone.Theme = {
+	Style = "crystal",
+	Thick = 1.2,
+	Floor = RGB(196, 178, 255),
+	FloorMat = Mat.Glass,
+	Body = RGB(96, 76, 170),
+	BodyMat = Mat.Glass,
+	Body2 = RGB(70, 56, 140),
+	Plaza = RGB(120, 100, 200),
+	PlazaMat = Mat.Marble,
+	Accent = RGB(255, 226, 120),
+	Accent2 = RGB(130, 220, 255),
+	Mover = RGB(120, 200, 255),
+	MoverMat = Mat.Glass,
+	Vanish = RGB(255, 170, 230),
+	VanishMat = Mat.Glass,
+	Ladder = RGB(255, 226, 120),
+	Hazard = RGB(255, 50, 90),
+	Post = RGB(50, 44, 96),
+	PostMat = Mat.Marble,
+}
+
+local Stages = {}
+Zone.Stages = Stages
+
+function Stages.MoonBoots(K)
+	K:floor(9, 8)
+	K:powerup("Feather", 0, 3, -4)
+	local hops = { { 18, 2 }, { 19, 4 }, { 18, -2 }, { 16, 8 } }
+	for i, h in ipairs(hops) do
+		K:hop(h[1], h[2], 9, 8)
+		K:coin(0, 9, -9 - h[1] / 2)
+		if i < #hops then
+			K:powerup("Feather", 0, 3, -4)
+		end
+	end
+	K:fwd(4)
+end
+
+function Stages.StarWheel(K)
+	local t = K.theme
+	K:floor(6, 8)
+	K:fwd(3)
+	local R = 14
+	local cz = 3 + R
+	local speed = -0.45
+	local hub = K:newPart("Part", {
+		Shape = Enum.PartType.Cylinder,
+		Size = Vector3.new(2, 5, 5),
+		CFrame = K:w(0, -0.6, cz),
+		Color = t.Accent,
+		Material = Mat.Neon,
+	})
+	hub.Name = "Deco"
+	K.ghost(hub)
+	K:deco(1, 60, 1, -1.6, -30.6, cz, t.Post, Mat.Marble)
+	K:deco(1, 60, 1, 1.6, -30.6, cz, t.Post, Mat.Marble)
+	for i = 0, 2 do
+		local spoke = K:deco(0.5, 0.5, R * 2, 0, -0.6, cz, t.Accent2, Mat.Neon, { Transparency = 0.3 })
+		spoke.CFrame = spoke.CFrame * CFrame.Angles(i * math.pi / 3, 0, 0)
+		K:rotor(spoke, 0, -0.6, cz, 1, 0, 0, speed)
+	end
+	for i = 0, 5 do
+		local a = i * math.pi / 3
+		local plat = K:slab(6, 6, 0, math.sin(a) * R, cz - math.cos(a) * R, { name = "WheelPlatform" })
+		K:rotor(plat, 0, -0.6, cz, 1, 0, 0, speed, { upright = true })
+	end
+	K:mark(9, cz)
+	K:coin(0, R + 4, cz)
+	K:fwd(6 + R * 2)
+	K:hop(3, 0, 6, 8)
+	K:hop(5, 1, 5, 5, { x = 2 })
+	K:coin(2, 3.5, -2.5)
+	K:hop(5, 1, 5, 5, { x = -2 })
+	K:coin(-2, 3.5, -2.5)
+	K:fwd(4)
+end
+
+function Stages.PhaseTiles(K)
+	local t = K.theme
+	K:floor(6, 8)
+	local xs = { 0, 3, 0, -3, 0, 3, 0, -3 }
+	for i = 1, 8 do
+		K:fwd(3)
+		local tile = K:slab(6, 6, xs[i], 0, 3, { name = "PhaseTile", color = t.Accent2 })
+		K:blink(tile, 2.2, 1.8, (i % 2 == 0) and 0.5 or 0, true)
+		if i % 2 == 0 then
+			K:coin(xs[i], 3.5, 3)
+		end
+		K:fwd(6)
+	end
+	K:hop(3, 0, 5, 6)
+	K:fwd(4)
+end
+
+function Stages.SpinnerGauntlet(K)
+	K:floor(6, 8)
+	K:floor(88, 8)
+	local specs = {
+		{ speed = 1.6 },
+		{ speed = -2 },
+		{ speed = 1.5, high = -1.1 },
+		{ speed = 1.4, cross = true },
+		{ speed = 2.1, high = -1.3, highCross = true },
+	}
+	for i, s in ipairs(specs) do
+		local z = -78 + (i - 1) * 17
+		K:spinner(z, 16, s.speed, { cross = s.cross, noHub = s.high ~= nil })
+		if s.high then
+			K:spinner(z, 16, s.high, { high = true, cross = s.highCross })
+		end
+		if i < #specs then
+			K:coin(0, 3.5, z + 8.5)
+		end
+	end
+	K:fwd(4)
+end
+
+function Stages.PowerTrip(K)
+	K:floor(9, 8)
+	K:powerup("Speed", 0, 3, -4)
+	K:hop(13, 0, 10, 8)
+	K:powerup("Jump", 0, 3, -5)
+	K:cliff(13, 8)
+	K:floor(10, 8)
+	K:powerup("Shield", 0, 3, -3)
+	K:floor(26, 6)
+	for i = 0, 6 do
+		K:kill(6, 6.5, 0.5, 0, 3.25, -24 + i * 3.5, { Transparency = 0.35, Name = "Curtain" })
+	end
+	K:floor(9, 8)
+	K:powerup("DoubleJump", 0, 3, -4)
+	K:coin(0, 3.5, -7)
+	K:hop(13, 1, 9, 8)
+	K:powerup("Feather", 0, 3, -4)
+	K:hop(19, 3, 9, 8)
+	K:coins(2, -2, 3.5, -4.5, 4, 0, 0)
+	K:fwd(4)
+end
+
+function Stages.TheAscent(K)
+	local t = K.theme
+	K:floor(6, 8)
+	-- crystal spire in the middle of the spiral
+	local sx, sz = -16.8, 4.5
+	K:decoCyl(12, 40, sx, -10, sz, t.Body2, Mat.Glass, { Transparency = 0.1 })
+	K:decoCyl(8, 40, sx, 30, sz, t.Body, Mat.Glass, { Transparency = 0.1 })
+	K:decoCyl(4, 30, sx, 65, sz, t.Accent2, Mat.Neon, { Transparency = 0.2 })
+	for i = 0, 3 do
+		K:decoCyl(14 - i * 2.5, 0.8, sx, i * 20, sz, t.Accent, Mat.Neon)
+		local shard = K:deco(1.4, 5, 1.4, sx + 10, 10 + i * 18, sz, t.Accent2, Mat.Neon, { Transparency = 0.2 })
+		K:rotor(shard, sx, 10 + i * 18, sz, 0, 1, 0, 0.5 + i * 0.15, { phase = i * 0.25 })
+	end
+	local kinds = { [4] = "truss", [10] = "truss", [15] = "truss", [6] = "lift", [12] = "lift", [8] = "vanish", [14] = "vanish" }
+	for i = 1, 18 do
+		local kind = kinds[i]
+		if kind == "truss" then
+			K:fwd(2)
+			K:truss(8, 0, -2, 1)
+			K:move(0, 6, 2)
+			K:floor(5, 5)
+		elseif kind == "lift" then
+			K:fwd(4)
+			K:mover(K:slab(5, 5, 0, 0, 2.5), 0, 5, 0, 5, 0, "hold")
+			K:move(0, 5, 5)
+		elseif kind == "vanish" then
+			K:move(0, 2.5, 4)
+			K:vanish(5, 5, 0, { delay = 0.8 })
+		else
+			K:hop(4, 2.5, 5, 5)
+			if i % 2 == 1 then
+				K:coin(0, 3.5, -2.5)
+			end
+		end
+		K:turn(-30)
+	end
+	K:turn(90)
+	K:hop(4, 2, 10, 6)
+	K:fwd(3)
+end
+
+function Zone.Backdrop(K)
+	Decor.planet(K, -230, 90, 200, 110, RGB(230, 150, 90), RGB(255, 220, 160))
+	Decor.planet(K, 260, 20, 420, 150, RGB(90, 120, 220), nil)
+	Decor.planet(K, -200, 180, 600, 70, RGB(190, 110, 220), RGB(160, 230, 255))
+	Decor.planet(K, 170, 220, 120, 40, RGB(230, 230, 240), nil)
+end
+
+function Zone.Scatter(K, x)
+	local rng = K.rng
+	local y = rng:NextNumber(-14, 8)
+	if rng:NextNumber() < 0.5 then
+		Decor.rock(K, x, y, 0, rng:NextNumber(4, 8), RGB(84, 74, 120), Mat.Slate)
+	end
+	Decor.crystals(K, x, y + 2, 0, rng:NextNumber(4, 7), Color3.fromHSV(rng:NextNumber(0.55, 0.85), 0.5, 1))
+end
+
+return Zone
+]]></ProtectedString></Properties></Item>
+</Item>
+</Item>
+</Item>
+</Item>
+<Item class="StarterPlayer" referent="RBX35"><Properties><string name="Name">StarterPlayer</string></Properties><Item class="StarterPlayerScripts" referent="RBX34"><Properties><string name="Name">StarterPlayerScripts</string></Properties><Item class="Folder" referent="RBX33"><Properties><string name="Name">Client</string></Properties><Item class="ModuleScript" referent="RBX22"><Properties><string name="Name">Ambience</string><ProtectedString name="Source"><![CDATA[--[[
+	Ambience (client)
+	Blends lighting, fog, post-processing, clouds, music and drifting
+	particles to match whichever zone the local player has reached.
+]]
+
+local Lighting = game:GetService("Lighting")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Config = require(Shared:WaitForChild("Config"))
+local Util = require(Shared:WaitForChild("Util"))
+local Bus = require(script.Parent.Bus)
+local Sound = require(script.Parent.Sound)
+
+local Ambience = {}
+
+local player = Players.LocalPlayer
+local currentZone = 0
+local musicLocked = true -- the title screen plays its own track first
+local emitters = {}
+local holder = nil
+
+local PARTICLES = {
+	Pollen = { Color = Color3.fromRGB(255, 250, 200), Rate = 10, Size = 0.35, Speed = 2, Life = 7, Accel = Vector3.new(0, 0.3, 0) },
+	Embers = { Color = Color3.fromRGB(255, 140, 40), Rate = 26, Size = 0.4, Speed = 5, Life = 5, Accel = Vector3.new(0, 4, 0) },
+	Snow = { Color = Color3.fromRGB(255, 255, 255), Rate = 60, Size = 0.3, Speed = 6, Life = 6, Accel = Vector3.new(0, -5, 0) },
+	Glitch = { Color = Color3.fromRGB(0, 240, 230), Rate = 12, Size = 0.3, Speed = 3, Life = 5, Accel = Vector3.new(0, 1, 0) },
+	Stars = { Color = Color3.fromRGB(220, 210, 255), Rate = 18, Size = 0.4, Speed = 1, Life = 8, Accel = Vector3.new(0, 0, 0) },
+}
+
+local function child(className, name)
+	local inst = Lighting:FindFirstChild(name)
+	if not inst then
+		inst = Instance.new(className)
+		inst.Name = name
+		inst.Parent = Lighting
+	end
+	return inst
+end
+
+local function apply(zoneIndex, duration)
+	local zone = Config.Zones[zoneIndex]
+	if not zone then
+		return
+	end
+	Util.tween(Lighting, duration, zone.Lighting, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+	Util.tween(child("Atmosphere", "ObbyAtmosphere"), duration, zone.Atmosphere, Enum.EasingStyle.Sine)
+	Util.tween(child("ColorCorrectionEffect", "ObbyColor"), duration, zone.Color_Correction, Enum.EasingStyle.Sine)
+	Util.tween(child("BloomEffect", "ObbyBloom"), duration, zone.Bloom, Enum.EasingStyle.Sine)
+	local terrain = workspace:FindFirstChildOfClass("Terrain")
+	local clouds = terrain and terrain:FindFirstChildOfClass("Clouds")
+	if clouds then
+		Util.tween(clouds, duration, zone.Clouds, Enum.EasingStyle.Sine)
+	end
+	for name, emitter in pairs(emitters) do
+		emitter.Enabled = name == zone.Particles
+	end
+	if not musicLocked then
+		Sound.music(zone.Music)
+	end
+end
+
+local function refresh(instant)
+	local zoneIndex = Config.zoneOf(player:GetAttribute("Stage") or 1)
+	if zoneIndex == currentZone then
+		return
+	end
+	local first = currentZone == 0
+	currentZone = zoneIndex
+	apply(zoneIndex, (instant or first) and 0.1 or 3)
+	if not first then
+		Bus.fire("ZoneEntered", zoneIndex)
+	end
+end
+
+-- Called when the title screen closes.
+function Ambience.unlockMusic()
+	musicLocked = false
+	local zone = Config.Zones[math.max(currentZone, 1)]
+	Sound.music(zone.Music)
+end
+
+function Ambience.start()
+	holder = Instance.new("Part")
+	holder.Name = "AmbientParticles"
+	holder.Anchored = true
+	holder.CanCollide = false
+	holder.CanQuery = false
+	holder.CanTouch = false
+	holder.Transparency = 1
+	holder.Size = Vector3.new(90, 1, 90)
+	holder.Parent = workspace
+	for name, info in pairs(PARTICLES) do
+		local emitter = Instance.new("ParticleEmitter")
+		emitter.Name = name
+		emitter.Color = ColorSequence.new(info.Color)
+		emitter.LightEmission = 0.8
+		emitter.Size = NumberSequence.new(info.Size)
+		emitter.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 1),
+			NumberSequenceKeypoint.new(0.2, 0.3),
+			NumberSequenceKeypoint.new(0.8, 0.3),
+			NumberSequenceKeypoint.new(1, 1),
+		})
+		emitter.Lifetime = NumberRange.new(info.Life * 0.6, info.Life)
+		emitter.Speed = NumberRange.new(info.Speed * 0.5, info.Speed)
+		emitter.SpreadAngle = Vector2.new(180, 180)
+		emitter.Acceleration = info.Accel
+		emitter.Rate = info.Rate
+		emitter.Enabled = false
+		emitter.Parent = holder
+		emitters[name] = emitter
+	end
+
+	RunService.Heartbeat:Connect(function()
+		local camera = workspace.CurrentCamera
+		if camera then
+			holder.CFrame = CFrame.new(camera.CFrame.Position + Vector3.new(0, 14, 0))
+		end
+	end)
+
+	player:GetAttributeChangedSignal("Stage"):Connect(function()
+		refresh(false)
+	end)
+	refresh(true)
+end
+
+return Ambience
+]]></ProtectedString></Properties></Item>
+<Item class="ModuleScript" referent="RBX23"><Properties><string name="Name">Bus</string><ProtectedString name="Source"><![CDATA[-- Bus: a tiny publish/subscribe hub so client modules stay decoupled.
+
+local Bus = {}
+
+local listeners = {}
+
+function Bus.on(name, callback)
+	local list = listeners[name]
+	if not list then
+		list = {}
+		listeners[name] = list
+	end
+	table.insert(list, callback)
+end
+
+function Bus.fire(name, ...)
+	local list = listeners[name]
+	if list then
+		for _, callback in ipairs(list) do
+			task.spawn(callback, ...)
+		end
+	end
+end
+
+return Bus
+]]></ProtectedString></Properties></Item>
+<Item class="ModuleScript" referent="RBX24"><Properties><string name="Name">Char</string><ProtectedString name="Source"><![CDATA[-- Char: keeps track of the local player's current character.
+
+local Players = game:GetService("Players")
+
+local Bus = require(script.Parent.Bus)
+
+local Char = {
+	character = nil,
+	humanoid = nil,
+	root = nil,
+}
+
+local player = Players.LocalPlayer
+
+local function onCharacter(character)
+	local humanoid = character:WaitForChild("Humanoid", 10)
+	local root = character:WaitForChild("HumanoidRootPart", 10)
+	if not humanoid or not root then
+		return
+	end
+	Char.character = character
+	Char.humanoid = humanoid
+	Char.root = root
+	Bus.fire("Spawned", character, humanoid, root)
+	humanoid.Died:Connect(function()
+		if Char.humanoid == humanoid then
+			Bus.fire("Died")
+		end
+	end)
+end
+
+function Char.alive()
+	local humanoid = Char.humanoid
+	return humanoid ~= nil and Char.root ~= nil and Char.root.Parent ~= nil and humanoid.Health > 0
+end
+
+-- Distance from the middle of the root part down to the soles of the feet.
+function Char.footOffset()
+	local humanoid = Char.humanoid
+	if humanoid.RigType == Enum.HumanoidRigType.R15 then
+		return humanoid.HipHeight + Char.root.Size.Y / 2
+	end
+	return 3
+end
+
+function Char.start()
+	player.CharacterAdded:Connect(onCharacter)
+	if player.Character then
+		task.spawn(onCharacter, player.Character)
+	end
+end
+
+return Char
+]]></ProtectedString></Properties></Item>
+<Item class="ModuleScript" referent="RBX25"><Properties><string name="Name">Fx</string><ProtectedString name="Source"><![CDATA[-- Fx (client): particles, camera shake and field-of-view kicks.
+
+local Debris = game:GetService("Debris")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Config = require(Shared:WaitForChild("Config"))
+local Util = require(Shared:WaitForChild("Util"))
+local Bus = require(script.Parent.Bus)
+local Char = require(script.Parent.Char)
+local Powers = require(script.Parent.Powers)
+
+local Fx = {}
+
+local shake = 0
+local BASE_FOV = 70
+
+-- A one-shot burst of sparkles at a world position.
+function Fx.burst(position, color, count, speed, size, lifetime)
+	local holder = Instance.new("Part")
+	holder.Anchored = true
+	holder.CanCollide = false
+	holder.CanQuery = false
+	holder.CanTouch = false
+	holder.Transparency = 1
+	holder.Size = Vector3.new(1, 1, 1)
+	holder.CFrame = CFrame.new(position)
+	holder.Parent = workspace
+	local emitter = Instance.new("ParticleEmitter")
+	emitter.Color = ColorSequence.new(color, Color3.new(1, 1, 1))
+	emitter.LightEmission = 1
+	emitter.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, size or 0.9), NumberSequenceKeypoint.new(1, 0) })
+	emitter.Lifetime = NumberRange.new((lifetime or 0.8) * 0.6, lifetime or 0.8)
+	emitter.Speed = NumberRange.new((speed or 16) * 0.5, speed or 16)
+	emitter.SpreadAngle = Vector2.new(180, 180)
+	emitter.Acceleration = Vector3.new(0, -30, 0)
+	emitter.Drag = 2
+	emitter.Rate = 0
+	emitter.Parent = holder
+	emitter:Emit(count or 20)
+	Debris:AddItem(holder, (lifetime or 0.8) + 0.5)
+end
+
+-- An expanding ring (double jump, bounce pads, checkpoints).
+function Fx.ring(position, color, size)
+	local ring = Instance.new("Part")
+	ring.Shape = Enum.PartType.Cylinder
+	ring.Anchored = true
+	ring.CanCollide = false
+	ring.CanQuery = false
+	ring.CanTouch = false
+	ring.CastShadow = false
+	ring.Material = Enum.Material.Neon
+	ring.Color = color
+	ring.Transparency = 0.3
+	ring.Size = Vector3.new(0.25, 2, 2)
+	ring.CFrame = CFrame.new(position) * CFrame.Angles(0, 0, math.rad(90))
+	ring.Parent = workspace
+	Util.tween(ring, 0.45, { Size = Vector3.new(0.1, size or 10, size or 10), Transparency = 1 })
+	Debris:AddItem(ring, 0.6)
+end
+
+function Fx.shake(amount)
+	shake = math.max(shake, amount)
+end
+
+local function render(dt)
+	local camera = workspace.CurrentCamera
+	if not camera then
+		return
+	end
+	if shake > 0.01 then
+		local offset = Vector3.new(math.random() - 0.5, math.random() - 0.5, 0) * shake
+		camera.CFrame = camera.CFrame * CFrame.new(offset)
+		shake = shake * math.max(0, 1 - dt * 9)
+	end
+	local target = BASE_FOV + (Powers.has("Speed") and 12 or 0)
+	local fov = camera.FieldOfView
+	if math.abs(fov - target) > 0.05 then
+		camera.FieldOfView = fov + (target - fov) * math.min(1, dt * 6)
+	end
+end
+
+function Fx.start()
+	Bus.on("Death", function(position)
+		Fx.burst(position, Config.UI.Red, 40, 26, 1.2, 0.9)
+		Fx.shake(1.2)
+	end)
+	Bus.on("CoinGot", function(position)
+		Fx.burst(position, Config.UI.Yellow, 10, 10, 0.6, 0.5)
+	end)
+	Bus.on("PowerGot", function(kind, position)
+		local color = Config.PowerUps[kind].Color
+		Fx.burst(position, color, 26, 18, 1, 0.8)
+		Fx.ring(position - Vector3.new(0, 2, 0), color, 14)
+	end)
+	Bus.on("AirJump", function(position)
+		Fx.ring(position - Vector3.new(0, 2.6, 0), Config.PowerUps.DoubleJump.Color, 9)
+	end)
+	Bus.on("Bounced", function(part)
+		Fx.ring(part.Position, Color3.fromRGB(255, 80, 170), 12)
+		Fx.shake(0.4)
+	end)
+	Bus.on("CheckpointFx", function()
+		if Char.root then
+			local position = Char.root.Position
+			Fx.ring(position - Vector3.new(0, 2.6, 0), Config.UI.Green, 20)
+			Fx.burst(position + Vector3.new(0, 2, 0), Config.UI.Green, 36, 22, 1, 1.1)
+		end
+	end)
+	Bus.on("WinFx", function()
+		for i = 1, 8 do
+			task.delay(i * 0.35, function()
+				if Char.root then
+					local offset = Vector3.new(math.random(-14, 14), math.random(8, 18), math.random(-14, 14))
+					Fx.burst(Char.root.Position + offset, Color3.fromHSV(math.random(), 0.8, 1), 50, 30, 1.4, 1.4)
+				end
+			end)
+		end
+	end)
+	RunService:BindToRenderStep("ObbyFx", Enum.RenderPriority.Camera.Value + 1, render)
+end
+
+return Fx
+]]></ProtectedString></Properties></Item>
+<Item class="LocalScript" referent="RBX26"><Properties><string name="Name">Main</string><ProtectedString name="Source"><![CDATA[-- Bobux Obby client entry point.
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Client = script.Parent
+local player = Players.LocalPlayer
+
+-- wait for the server to build the world and load our save
+workspace:WaitForChild("Obby")
+ReplicatedStorage:WaitForChild("Remotes")
+while not player:GetAttribute("Ready") do
+	task.wait(0.1)
+end
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Bus = require(Client.Bus)
+local Char = require(Client.Char)
+local Sound = require(Client.Sound)
+local World = require(Client.World)
+local Powers = require(Client.Powers)
+local Touch = require(Client.Touch)
+local Fx = require(Client.Fx)
+local Ambience = require(Client.Ambience)
+local UI = require(Client.UI)
+
+Sound.start()
+Bus.on("Sfx", Sound.play)
+World.start()
+Powers.start()
+Touch.start()
+Fx.start()
+Ambience.start()
+UI.start()
+Char.start()
+
+Sound.music(Config.Audio.Music.Title)
+]]></ProtectedString></Properties></Item>
+<Item class="ModuleScript" referent="RBX27"><Properties><string name="Name">Powers</string><ProtectedString name="Source"><![CDATA[--[[
+	Powers (client)
+	Temporary power-ups. The client owns its character's physics, so effects
+	are applied here the instant an orb is touched (no waiting on the
+	server), and cleared when they run out or the player respawns.
+]]
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Bus = require(script.Parent.Bus)
+local Char = require(script.Parent.Char)
+
+local Powers = {
+	active = {}, -- [kind] = { expires = os.clock time, duration = seconds }
+}
+
+local usedAirJump = false
+local lastJump = 0
+local floatForce = nil
+
+function Powers.has(kind)
+	local entry = Powers.active[kind]
+	return entry ~= nil and entry.expires > os.clock()
+end
+
+function Powers.grant(kind, duration)
+	local cfg = Config.PowerUps[kind]
+	if not cfg then
+		return
+	end
+	duration = duration or cfg.Duration
+	local entry = Powers.active[kind]
+	local expires = os.clock() + duration
+	if entry and entry.expires > expires then
+		return -- already have a longer one
+	end
+	Powers.active[kind] = { expires = expires, duration = duration }
+	Bus.fire("PowerChanged", kind, true)
+end
+
+function Powers.clear()
+	for kind in pairs(Powers.active) do
+		Powers.active[kind] = nil
+		Bus.fire("PowerChanged", kind, false)
+	end
+end
+
+local function setFloat(on)
+	local root = Char.root
+	if on and root and not floatForce then
+		local attachment = Instance.new("Attachment")
+		attachment.Name = "MoonBoots"
+		attachment.Parent = root
+		local force = Instance.new("VectorForce")
+		force.Name = "MoonBootsForce"
+		force.Attachment0 = attachment
+		force.ApplyAtCenterOfMass = true
+		force.RelativeTo = Enum.ActuatorRelativeTo.World
+		force.Force = Vector3.new(0, root.AssemblyMass * workspace.Gravity * (1 - Config.PowerUps.Feather.GravityScale), 0)
+		force.Parent = root
+		floatForce = { force = force, attachment = attachment }
+	elseif not on and floatForce then
+		floatForce.force:Destroy()
+		floatForce.attachment:Destroy()
+		floatForce = nil
+	end
+end
+
+local function update()
+	local clock = os.clock()
+	for kind, entry in pairs(Powers.active) do
+		if entry.expires <= clock then
+			Powers.active[kind] = nil
+			Bus.fire("PowerChanged", kind, false)
+			Bus.fire("Sfx", "PowerDown")
+		end
+	end
+	if not Char.alive() then
+		return
+	end
+	local humanoid = Char.humanoid
+	local speed = Powers.has("Speed") and Config.PowerUps.Speed.WalkSpeed or Config.Physics.WalkSpeed
+	local jump = Powers.has("Jump") and Config.PowerUps.Jump.JumpPower or Config.Physics.JumpPower
+	if humanoid.WalkSpeed ~= speed then
+		humanoid.WalkSpeed = speed
+	end
+	if humanoid.JumpPower ~= jump then
+		humanoid.UseJumpPower = true
+		humanoid.JumpPower = jump
+	end
+	setFloat(Powers.has("Feather"))
+end
+
+local function onJumpRequest()
+	if not Powers.has("DoubleJump") or usedAirJump or not Char.alive() then
+		return
+	end
+	local humanoid = Char.humanoid
+	if humanoid:GetState() == Enum.HumanoidStateType.Freefall and os.clock() - lastJump > 0.18 then
+		usedAirJump = true
+		humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+		Bus.fire("Sfx", "DoubleJump")
+		Bus.fire("AirJump", Char.root.Position)
+	end
+end
+
+function Powers.start()
+	Bus.on("Spawned", function(_, humanoid)
+		floatForce = nil
+		usedAirJump = false
+		Powers.clear()
+		humanoid.StateChanged:Connect(function(_, new)
+			if new == Enum.HumanoidStateType.Landed or new == Enum.HumanoidStateType.Running or new == Enum.HumanoidStateType.Climbing then
+				usedAirJump = false
+			elseif new == Enum.HumanoidStateType.Jumping then
+				lastJump = os.clock()
+			end
+		end)
+	end)
+	Bus.on("Died", function()
+		floatForce = nil
+		Powers.clear()
+	end)
+	UserInputService.JumpRequest:Connect(onJumpRequest)
+	RunService.Heartbeat:Connect(update)
+end
+
+return Powers
+]]></ProtectedString></Properties></Item>
+<Item class="ModuleScript" referent="RBX28"><Properties><string name="Name">Sound</string><ProtectedString name="Source"><![CDATA[-- Sound: sound effects and cross-fading music.
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local SoundService = game:GetService("SoundService")
+
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Config = require(Shared:WaitForChild("Config"))
+local Util = require(Shared:WaitForChild("Util"))
+
+local Sound = {
+	musicOn = true,
+	sfxOn = true,
+}
+
+local sfx = {}
+local folder = nil
+local current = nil -- currently playing music Sound
+local currentId = nil
+
+function Sound.start()
+	folder = Instance.new("Folder")
+	folder.Name = "ObbySounds"
+	folder.Parent = SoundService
+	for name, info in pairs(Config.Audio.Sfx) do
+		local sound = Instance.new("Sound")
+		sound.Name = name
+		sound.SoundId = "rbxassetid://" .. info.Id
+		sound.Volume = info.Volume * Config.Audio.SfxVolume
+		sound.Parent = folder
+		sfx[name] = sound
+	end
+end
+
+function Sound.play(name, pitch)
+	local sound = sfx[name]
+	if not sound or not Sound.sfxOn then
+		return
+	end
+	sound.PlaybackSpeed = pitch or 1
+	-- PlayLocalSound lets the same effect overlap itself
+	SoundService:PlayLocalSound(sound)
+end
+
+function Sound.music(id)
+	if id == currentId then
+		return
+	end
+	currentId = id
+	local old = current
+	if old then
+		Util.tween(old, 1.2, { Volume = 0 })
+		task.delay(1.3, function()
+			old:Destroy()
+		end)
+	end
+	if not id then
+		current = nil
+		return
+	end
+	local track = Instance.new("Sound")
+	track.Name = "Music"
+	track.SoundId = "rbxassetid://" .. id
+	track.Looped = true
+	track.Volume = 0
+	track.Parent = folder
+	track:Play()
+	current = track
+	Util.tween(track, 1.6, { Volume = Sound.musicOn and Config.Audio.MusicVolume or 0 })
+end
+
+function Sound.setMusic(on)
+	Sound.musicOn = on
+	if current then
+		Util.tween(current, 0.4, { Volume = on and Config.Audio.MusicVolume or 0 })
+	end
+end
+
+function Sound.setSfx(on)
+	Sound.sfxOn = on
+end
+
+return Sound
+]]></ProtectedString></Properties></Item>
+<Item class="ModuleScript" referent="RBX29"><Properties><string name="Name">Touch</string><ProtectedString name="Source"><![CDATA[--[[
+	Touch (client)
+	Decides what the local character is touching every frame: hazards,
+	bounce pads, crumbling tiles, coins and power-ups, plus falling into the
+	void. Doing this on the client (with exact box tests rather than Touched
+	events) makes hits feel instant and fair even on a laggy connection.
+]]
+
+local CollectionService = game:GetService("CollectionService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Bus = require(script.Parent.Bus)
+local Char = require(script.Parent.Char)
+local Powers = require(script.Parent.Powers)
+local World = require(script.Parent.World)
+
+local Touch = {}
+
+local player = Players.LocalPlayer
+local remotes = nil
+
+local kinds = {} -- [part] = "Kill" | "Bounce" | "Vanish" | "Coin" | "PowerUp"
+local contactList, pickupList = {}, {}
+local contactParams, pickupParams = OverlapParams.new(), OverlapParams.new()
+local dirty = true
+local checkpointY = {}
+local dying = false
+local lastBounce = 0
+local bounceBoost = nil
+local padCooldown = {}
+
+local CONTACT = { Kill = true, Bounce = true, Vanish = true }
+
+local function track(tagName)
+	local isContact = CONTACT[tagName] == true
+	local function add(part)
+		if part:IsA("BasePart") and not kinds[part] then
+			kinds[part] = tagName
+			table.insert(isContact and contactList or pickupList, part)
+			dirty = true
+		end
+	end
+	CollectionService:GetInstanceAddedSignal(tagName):Connect(add)
+	for _, part in ipairs(CollectionService:GetTagged(tagName)) do
+		add(part)
+	end
+end
+
+----------------------------------------------------------------------
+-- Exact overlap tests
+----------------------------------------------------------------------
+
+-- Oriented box vs oriented box (separating axis theorem).
+local function boxesOverlap(cfA, sizeA, cfB, sizeB)
+	local rel = cfA:ToObjectSpace(cfB)
+	local t = rel.Position
+	local ha, hb = sizeA / 2, sizeB / 2
+	local a = { ha.X, ha.Y, ha.Z }
+	local b = { hb.X, hb.Y, hb.Z }
+	local axes = { rel.XVector, rel.YVector, rel.ZVector }
+	local R, AbsR = {}, {}
+	for i = 1, 3 do
+		R[i], AbsR[i] = {}, {}
+	end
+	for j = 1, 3 do
+		local v = axes[j]
+		R[1][j], R[2][j], R[3][j] = v.X, v.Y, v.Z
+		AbsR[1][j], AbsR[2][j], AbsR[3][j] = math.abs(v.X) + 1e-5, math.abs(v.Y) + 1e-5, math.abs(v.Z) + 1e-5
+	end
+	local tv = { t.X, t.Y, t.Z }
+	for i = 1, 3 do
+		if math.abs(tv[i]) > a[i] + b[1] * AbsR[i][1] + b[2] * AbsR[i][2] + b[3] * AbsR[i][3] then
+			return false
+		end
+	end
+	for j = 1, 3 do
+		local proj = math.abs(tv[1] * R[1][j] + tv[2] * R[2][j] + tv[3] * R[3][j])
+		if proj > a[1] * AbsR[1][j] + a[2] * AbsR[2][j] + a[3] * AbsR[3][j] + b[j] then
+			return false
+		end
+	end
+	for i = 1, 3 do
+		local i1, i2 = i % 3 + 1, (i + 1) % 3 + 1
+		for j = 1, 3 do
+			local j1, j2 = j % 3 + 1, (j + 1) % 3 + 1
+			local ra = a[i1] * AbsR[i2][j] + a[i2] * AbsR[i1][j]
+			local rb = b[j1] * AbsR[i][j2] + b[j2] * AbsR[i][j1]
+			if math.abs(tv[i2] * R[i1][j] - tv[i1] * R[i2][j]) > ra + rb then
+				return false
+			end
+		end
+	end
+	return true
+end
+
+local function ballOverlaps(boxCF, boxSize, part)
+	local p = boxCF:PointToObjectSpace(part.Position)
+	local h = boxSize / 2
+	local closest = Vector3.new(math.clamp(p.X, -h.X, h.X), math.clamp(p.Y, -h.Y, h.Y), math.clamp(p.Z, -h.Z, h.Z))
+	return (p - closest).Magnitude <= part.Size.X / 2
+end
+
+local function touches(boxCF, boxSize, part)
+	if part:IsA("Part") and part.Shape == Enum.PartType.Ball then
+		return ballOverlaps(boxCF, boxSize, part)
+	end
+	return boxesOverlap(boxCF, boxSize, part.CFrame, part.Size)
+end
+
+----------------------------------------------------------------------
+-- Reactions
+----------------------------------------------------------------------
+
+local function die(reason)
+	if dying or not Char.alive() then
+		return
+	end
+	dying = true
+	Bus.fire("Sfx", "Death")
+	Bus.fire("Death", Char.root.Position, reason)
+	remotes.Died:FireServer()
+	-- the client may always end its own character's life; this makes the
+	-- reaction instant instead of waiting on the server
+	Char.humanoid.Health = 0
+end
+
+local function bounce(part)
+	local clock = os.clock()
+	if clock - lastBounce < 0.3 then
+		return
+	end
+	lastBounce = clock
+	local power = part:GetAttribute("Power") or 80
+	local root, humanoid = Char.root, Char.humanoid
+	humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
+	local v = root.AssemblyLinearVelocity
+	root.AssemblyLinearVelocity = Vector3.new(v.X, power, v.Z)
+	bounceBoost = { power = power, untilTime = clock + 0.06 }
+	Bus.fire("Sfx", "Bounce")
+	Bus.fire("Bounced", part)
+end
+
+local function collect(part, kind)
+	if kind == "Coin" then
+		World.hideCoin(part)
+		remotes.Collect:FireServer(part)
+		Bus.fire("Sfx", "Coin")
+		Bus.fire("CoinGot", part.Position)
+	else
+		local clock = os.clock()
+		if (padCooldown[part] or 0) > clock then
+			return
+		end
+		local isPad = part:GetAttribute("Pad") == true
+		padCooldown[part] = clock + (isPad and 0.6 or Config.PickupRespawn)
+		local power = part:GetAttribute("Kind")
+		Powers.grant(power, part:GetAttribute("Duration"))
+		if not isPad then
+			World.hideOrb(part, Config.PickupRespawn)
+		end
+		remotes.Collect:FireServer(part)
+		Bus.fire("Sfx", "PowerUp")
+		Bus.fire("PowerGot", power, part.Position)
+	end
+end
+
+local function refreshCheckpoints()
+	for _, trigger in ipairs(CollectionService:GetTagged("Checkpoint")) do
+		local index = trigger:GetAttribute("Stage")
+		if index then
+			checkpointY[index] = trigger.Position.Y - 6
+		end
+	end
+end
+
+local function voidHeight()
+	local stage = player:GetAttribute("Stage") or 1
+	local a = checkpointY[stage]
+	if not a then
+		refreshCheckpoints()
+		a = checkpointY[stage]
+	end
+	if not a then
+		return -400
+	end
+	local b = checkpointY[stage + 1] or a
+	return math.min(a, b) - Config.Physics.VoidMargin
+end
+
+local function step()
+	if not Char.alive() then
+		return
+	end
+	local root = Char.root
+	if dirty then
+		dirty = false
+		contactParams.FilterType = Enum.RaycastFilterType.Include
+		contactParams.FilterDescendantsInstances = contactList
+		pickupParams.FilterType = Enum.RaycastFilterType.Include
+		pickupParams.FilterDescendantsInstances = pickupList
+	end
+
+	if bounceBoost then
+		if os.clock() < bounceBoost.untilTime then
+			local v = root.AssemblyLinearVelocity
+			if v.Y < bounceBoost.power * 0.8 then
+				root.AssemblyLinearVelocity = Vector3.new(v.X, bounceBoost.power, v.Z)
+			end
+		else
+			bounceBoost = nil
+		end
+	end
+
+	if root.Position.Y < voidHeight() then
+		die("void")
+		return
+	end
+
+	-- the hitbox: a little wider than the body, reaching just below the feet
+	local foot = Char.footOffset() + 0.2
+	local top = 2.3
+	local size = Vector3.new(2.2, foot + top, 1.2)
+	local boxCF = root.CFrame * CFrame.new(0, (top - foot) / 2, 0)
+
+	local near = workspace:GetPartBoundsInBox(boxCF, size + Vector3.new(1, 1, 1), contactParams)
+	local shielded = Powers.has("Shield")
+	for _, part in ipairs(near) do
+		local kind = kinds[part]
+		if touches(boxCF, size, part) then
+			if kind == "Kill" then
+				if not shielded then
+					die("hazard")
+					return
+				end
+			elseif kind == "Bounce" then
+				bounce(part)
+			elseif kind == "Vanish" then
+				World.vanish(part)
+			end
+		end
+	end
+
+	local pickups = workspace:GetPartBoundsInRadius(root.Position, 4, pickupParams)
+	for _, part in ipairs(pickups) do
+		collect(part, kinds[part])
+	end
+end
+
+function Touch.start()
+	remotes = ReplicatedStorage:WaitForChild("Remotes")
+	for _, tagName in ipairs({ "Kill", "Bounce", "Vanish", "Coin", "PowerUp" }) do
+		track(tagName)
+	end
+	Bus.on("Spawned", function()
+		dying = false
+		bounceBoost = nil
+	end)
+	refreshCheckpoints()
+	RunService.Heartbeat:Connect(step)
+end
+
+-- Respawn at the current checkpoint on request (R key / reset button).
+function Touch.reset()
+	die("reset")
+end
+
+return Touch
+]]></ProtectedString></Properties></Item>
+<Item class="ModuleScript" referent="RBX31"><Properties><string name="Name">UI</string><ProtectedString name="Source"><![CDATA[--[[
+	UI (client)
+	The whole interface, built from code: title screen, HUD (stage, progress,
+	coins, timer, power-ups), toasts, zone cards, and the Stages / Trails /
+	Settings menus. Everything scales to the screen, so it is comfortable on
+	a phone, a tablet, a laptop or a TV, with mouse, touch, keyboard or
+	gamepad.
+]]
+
+local ContextActionService = game:GetService("ContextActionService")
+local GuiService = game:GetService("GuiService")
+local Lighting = game:GetService("Lighting")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Config = require(Shared:WaitForChild("Config"))
+local Util = require(Shared:WaitForChild("Util"))
+local Client = script.Parent
+local Bus = require(Client.Bus)
+local Sound = require(Client.Sound)
+local Powers = require(Client.Powers)
+local Touch = require(Client.Touch)
+local Ambience = require(Client.Ambience)
+local W = require(script.Widgets)
+
+local UI = {}
+
+local C = Config.UI
+local make = Util.make
+local player = Players.LocalPlayer
+local remotes = nil
+
+local gui, rootScale
+local stageTitle, stageName, stageBadge, progressFill
+local coinLabel, timerLabel
+local tray, trayTiles = nil, {}
+local toast, toastScale
+local zoneCard, zoneTitle, zoneSub, zoneBar
+local flash
+local modal, modalTitle, pages, openPage = nil, nil, {}, nil
+local stageButtons, trailRows = {}, {}
+local hints = {}
+local titleScreen, blur
+local restartArmed = 0
+
+local function attr(name, default)
+	local value = player:GetAttribute(name)
+	if value == nil then
+		return default
+	end
+	return value
+end
+
+----------------------------------------------------------------------
+-- Layout scaling and device detection
+----------------------------------------------------------------------
+
+local function isTouch()
+	return UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+end
+
+local function rescale()
+	local camera = workspace.CurrentCamera
+	if not camera then
+		return
+	end
+	local size = camera.ViewportSize
+	local scale = math.min(size.X / 1280, size.Y / 720)
+	if isTouch() then
+		scale = scale * 1.25 -- fingers need bigger targets than a mouse
+	end
+	rootScale.Scale = math.clamp(scale, 0.5, 1.4)
+end
+
+local function refreshHints()
+	local show = UserInputService.KeyboardEnabled and not isTouch()
+	for _, hint in ipairs(hints) do
+		hint.Visible = show
+	end
+end
+
+----------------------------------------------------------------------
+-- HUD
+----------------------------------------------------------------------
+
+local function buildStagePill()
+	local pill = W.panel(gui, {
+		Name = "Stage",
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.new(0.5, 0, 0, 8),
+		Size = UDim2.new(0, 380, 0, 58),
+		BackgroundTransparency = 0.1,
+	}, 18)
+	stageBadge = W.frame(pill, { Position = UDim2.new(0, 7, 0, 7), Size = UDim2.new(0, 44, 0, 44), BackgroundColor3 = C.Green })
+	W.corner(stageBadge, 22)
+	W.stroke(stageBadge, 2)
+	W.label(stageBadge, "1", { Name = "Number", Position = UDim2.new(0.12, 0, 0.12, 0), Size = UDim2.new(0.76, 0, 0.76, 0) })
+	stageTitle = W.label(pill, "STAGE 1 / 30", {
+		Position = UDim2.new(0, 60, 0, 5),
+		Size = UDim2.new(1, -70, 0, 24),
+		TextXAlignment = Enum.TextXAlignment.Left,
+	})
+	stageName = W.label(pill, "", {
+		Position = UDim2.new(0, 60, 0, 29),
+		Size = UDim2.new(1, -70, 0, 16),
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextColor3 = C.SubText,
+		Font = C.FontBody,
+	})
+	local bar = W.frame(pill, { Position = UDim2.new(0, 60, 1, -11), Size = UDim2.new(1, -72, 0, 6), BackgroundColor3 = C.PanelLight })
+	W.corner(bar, 3)
+	progressFill = W.frame(bar, { Size = UDim2.new(0, 0, 1, 0), BackgroundColor3 = C.Green })
+	W.corner(progressFill, 3)
+end
+
+local function buildStats()
+	local coins = W.panel(gui, { Name = "Coins", Position = UDim2.new(0, 10, 0, 8), Size = UDim2.new(0, 150, 0, 40), BackgroundTransparency = 0.1 }, 14)
+	W.label(coins, "🪙", { Position = UDim2.new(0, 6, 0, 5), Size = UDim2.new(0, 30, 0, 30) })
+	coinLabel = W.label(coins, "0", {
+		Position = UDim2.new(0, 42, 0, 6),
+		Size = UDim2.new(1, -50, 0, 28),
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextColor3 = C.Yellow,
+	})
+	local timer = W.panel(gui, { Name = "Timer", Position = UDim2.new(0, 10, 0, 54), Size = UDim2.new(0, 150, 0, 40), BackgroundTransparency = 0.1 }, 14)
+	W.label(timer, "⏱", { Position = UDim2.new(0, 6, 0, 5), Size = UDim2.new(0, 30, 0, 30) })
+	timerLabel = W.label(timer, "0:00.0", {
+		Position = UDim2.new(0, 42, 0, 6),
+		Size = UDim2.new(1, -50, 0, 28),
+		TextXAlignment = Enum.TextXAlignment.Left,
+	})
+end
+
+local function buildSideButtons()
+	local column = W.frame(gui, {
+		Name = "Buttons",
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0, 10, 0, 102),
+		Size = UDim2.new(0, 60, 0, 250),
+	})
+	make("UIListLayout", { Padding = UDim.new(0, 8), SortOrder = Enum.SortOrder.LayoutOrder }, column)
+	local specs = {
+		{ "🗺", C.Blue, "M", function() UI.toggle("Stages") end },
+		{ "✨", C.Pink, "T", function() UI.toggle("Trails") end },
+		{ "⚙", C.PanelLight, "P", function() UI.toggle("Settings") end },
+		{ "↺", C.Red, "R", function() Touch.reset() end },
+	}
+	for i, spec in ipairs(specs) do
+		local button = W.button(column, spec[1], spec[2], { Size = UDim2.new(0, 54, 0, 54), LayoutOrder = i }, spec[4])
+		local hint = W.label(button, spec[3], {
+			AnchorPoint = Vector2.new(1, 1),
+			Position = UDim2.new(1, 4, 1, 4),
+			Size = UDim2.new(0, 20, 0, 20),
+			BackgroundTransparency = 0,
+			BackgroundColor3 = C.Stroke,
+			Font = C.FontBody,
+		})
+		W.corner(hint, 6)
+		table.insert(hints, hint)
+	end
+end
+
+local function buildTray()
+	tray = W.frame(gui, {
+		Name = "PowerUps",
+		BackgroundTransparency = 1,
+		AnchorPoint = Vector2.new(0.5, 1),
+		Position = UDim2.new(0.5, 0, 1, -14),
+		Size = UDim2.new(0, 700, 0, 56),
+	})
+	make("UIListLayout", {
+		FillDirection = Enum.FillDirection.Horizontal,
+		HorizontalAlignment = Enum.HorizontalAlignment.Center,
+		Padding = UDim.new(0, 8),
+	}, tray)
+	for _, kind in ipairs(Config.PowerUpOrder) do
+		local cfg = Config.PowerUps[kind]
+		local tile = W.panel(tray, { Name = kind, Size = UDim2.new(0, 150, 0, 56), Visible = false, BackgroundTransparency = 0.05 }, 14)
+		W.label(tile, cfg.Icon, { Position = UDim2.new(0, 6, 0, 6), Size = UDim2.new(0, 34, 0, 34) })
+		W.label(tile, cfg.Name, {
+			Position = UDim2.new(0, 46, 0, 6),
+			Size = UDim2.new(1, -54, 0, 22),
+			TextXAlignment = Enum.TextXAlignment.Left,
+			TextColor3 = cfg.Color,
+		})
+		local bar = W.frame(tile, { Position = UDim2.new(0, 46, 0, 34), Size = UDim2.new(1, -56, 0, 10), BackgroundColor3 = C.PanelLight })
+		W.corner(bar, 5)
+		local fill = W.frame(bar, { Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = cfg.Color })
+		W.corner(fill, 5)
+		trayTiles[kind] = { tile = tile, fill = fill }
+	end
+end
+
+local function buildToast()
+	toast = W.label(gui, "", {
+		Name = "Toast",
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.new(0.5, 0, 0, 84),
+		Size = UDim2.new(0, 560, 0, 44),
+		TextColor3 = C.Green,
+		Visible = false,
+	})
+	toastScale = make("UIScale", { Scale = 1 }, toast)
+
+	zoneCard = W.frame(gui, {
+		Name = "ZoneCard",
+		BackgroundTransparency = 1,
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.new(0.5, 0, 0.34, 0),
+		Size = UDim2.new(0, 760, 0, 150),
+		Visible = false,
+	})
+	zoneSub = W.label(zoneCard, "ZONE 1", { Size = UDim2.new(1, 0, 0, 30), TextColor3 = C.SubText })
+	zoneTitle = W.label(zoneCard, "", { Position = UDim2.new(0, 0, 0, 30), Size = UDim2.new(1, 0, 0, 76) })
+	zoneBar = W.frame(zoneCard, { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 110), Size = UDim2.new(0, 0, 0, 6) })
+	W.corner(zoneBar, 3)
+	W.label(zoneCard, "", { Name = "Tagline", Position = UDim2.new(0, 0, 0, 120), Size = UDim2.new(1, 0, 0, 26), Font = C.FontBody })
+
+	flash = W.frame(gui, {
+		Name = "Flash",
+		Size = UDim2.new(1, 0, 1, 0),
+		BackgroundColor3 = C.Red,
+		BackgroundTransparency = 1,
+		ZIndex = 20,
+	})
+end
+
+function UI.toast(text, color)
+	toast.Text = text
+	toast.TextColor3 = color or C.Green
+	toast.TextTransparency = 0
+	toast.Visible = true
+	toastScale.Scale = 0.5
+	Util.tween(toastScale, 0.3, { Scale = 1 }, Enum.EasingStyle.Back)
+	local stamp = os.clock()
+	toast:SetAttribute("Stamp", stamp)
+	task.delay(1.8, function()
+		if toast:GetAttribute("Stamp") == stamp then
+			toast.Visible = false
+		end
+	end)
+end
+
+local function showZone(zoneIndex)
+	local zone = Config.Zones[zoneIndex]
+	zoneSub.Text = "ZONE " .. zoneIndex
+	zoneTitle.Text = string.upper(zone.Name)
+	zoneTitle.TextColor3 = zone.Color
+	zoneCard.Tagline.Text = zone.Tagline
+	zoneBar.BackgroundColor3 = zone.Color
+	zoneBar.Size = UDim2.new(0, 0, 0, 6)
+	zoneCard.Visible = true
+	W.pop(zoneCard)
+	Util.tween(zoneBar, 0.6, { Size = UDim2.new(0, 520, 0, 6) })
+	Sound.play("Zone")
+	task.delay(3.2, function()
+		zoneCard.Visible = false
+	end)
+end
+
+----------------------------------------------------------------------
+-- Menus
+----------------------------------------------------------------------
+
+function UI.close()
+	if openPage then
+		openPage = nil
+		modal.Visible = false
+		Sound.play("Close")
+		GuiService.SelectedObject = nil
+	end
+end
+
+function UI.toggle(name)
+	if openPage == name then
+		UI.close()
+		return
+	end
+	openPage = name
+	for pageName, page in pairs(pages) do
+		page.Visible = pageName == name
+	end
+	modalTitle.Text = string.upper(name)
+	modal.Visible = true
+	W.pop(modal.Window)
+	Sound.play("Open")
+	UI.refreshMenus()
+end
+
+local function buildModal()
+	modal = W.frame(gui, {
+		Name = "Modal",
+		Size = UDim2.new(1, 0, 1, 0),
+		BackgroundColor3 = Color3.new(0, 0, 0),
+		BackgroundTransparency = 0.45,
+		Visible = false,
+		Active = true,
+		ZIndex = 10,
+	})
+	local window = W.panel(modal, {
+		Name = "Window",
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.new(0.5, 0, 0.5, 0),
+		Size = UDim2.new(0, 600, 0, 460),
+		ZIndex = 11,
+	}, 22)
+	modalTitle = W.label(window, "MENU", { Position = UDim2.new(0, 24, 0, 12), Size = UDim2.new(1, -110, 0, 40), TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 12 })
+	W.button(window, "✕", C.Red, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -12, 0, 10), Size = UDim2.new(0, 46, 0, 46), ZIndex = 12 }, UI.close)
+
+	local function page(name, scrolling)
+		local frame
+		if scrolling then
+			frame = make("ScrollingFrame", {
+				BackgroundTransparency = 1,
+				BorderSizePixel = 0,
+				ScrollBarThickness = 8,
+				AutomaticCanvasSize = Enum.AutomaticSize.Y,
+				CanvasSize = UDim2.new(0, 0, 0, 0),
+			}, nil)
+		else
+			frame = make("Frame", { BackgroundTransparency = 1 }, nil)
+		end
+		frame.Name = name
+		frame.Position = UDim2.new(0, 20, 0, 66)
+		frame.Size = UDim2.new(1, -40, 1, -84)
+		frame.Visible = false
+		frame.ZIndex = 12
+		frame.Parent = window
+		pages[name] = frame
+		return frame
+	end
+
+	-- Stages: jump to any checkpoint you have already reached
+	local stages = page("Stages", true)
+	make("UIGridLayout", { CellSize = UDim2.new(0, 100, 0, 62), CellPadding = UDim2.new(0, 8, 0, 8), SortOrder = Enum.SortOrder.LayoutOrder }, stages)
+	for index, info in ipairs(Config.Stages) do
+		local zone = Config.Zones[info.Zone]
+		local button, label = W.button(stages, tostring(index), zone.Color, { LayoutOrder = index, ZIndex = 13 }, function()
+			if index <= attr("MaxStage", 1) then
+				remotes.Teleport:FireServer(index)
+				UI.close()
+			else
+				Sound.play("Error")
+			end
+		end)
+		label.ZIndex = 14
+		stageButtons[index] = { button = button, label = label, color = zone.Color }
+	end
+
+	-- Trails
+	local trails = page("Trails", true)
+	make("UIListLayout", { Padding = UDim.new(0, 8), SortOrder = Enum.SortOrder.LayoutOrder }, trails)
+	for i, info in ipairs(Config.Trails) do
+		local row = W.frame(trails, { Size = UDim2.new(1, -14, 0, 58), BackgroundColor3 = C.PanelLight, LayoutOrder = i, ZIndex = 13 })
+		W.corner(row, 12)
+		local swatch = W.frame(row, { Position = UDim2.new(0, 10, 0, 14), Size = UDim2.new(0, 90, 0, 30), BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 14 })
+		W.corner(swatch, 8)
+		if info.Rainbow then
+			local points = {}
+			for k = 0, 6 do
+				points[k + 1] = ColorSequenceKeypoint.new(k / 6, Color3.fromHSV(k / 6.001, 0.9, 1))
+			end
+			make("UIGradient", { Color = ColorSequence.new(points) }, swatch)
+		elseif info.A then
+			make("UIGradient", { Color = ColorSequence.new(info.A, info.B) }, swatch)
+		else
+			swatch.BackgroundColor3 = C.Locked
+		end
+		W.label(row, info.Name, { Position = UDim2.new(0, 112, 0, 12), Size = UDim2.new(0, 200, 0, 34), TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 14 })
+		local button, label = W.button(row, "", C.Green, {
+			AnchorPoint = Vector2.new(1, 0.5),
+			Position = UDim2.new(1, -10, 0.5, 0),
+			Size = UDim2.new(0, 170, 0, 42),
+			ZIndex = 14,
+		}, function()
+			local owned = string.find("," .. attr("OwnedTrails", "None") .. ",", "," .. info.Id .. ",", 1, true) ~= nil
+			if owned then
+				remotes.Shop:FireServer("Equip", info.Id)
+			elseif attr("Coins", 0) >= info.Price then
+				remotes.Shop:FireServer("Buy", info.Id)
+				Sound.play("Buy")
+			else
+				Sound.play("Error")
+				UI.toast("Not enough coins!", C.Red)
+			end
+		end)
+		label.ZIndex = 15
+		trailRows[i] = { info = info, button = button, label = label }
+	end
+
+	-- Settings
+	local settings = page("Settings", false)
+	local function toggleRow(y, text, get, set)
+		W.label(settings, text, { Position = UDim2.new(0, 6, 0, y), Size = UDim2.new(0, 300, 0, 40), TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 13 })
+		local button, label
+		button, label = W.button(settings, "ON", C.Green, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -6, 0, y), Size = UDim2.new(0, 130, 0, 42), ZIndex = 13 }, function()
+			set(not get())
+			label.Text = get() and "ON" or "OFF"
+			button.BackgroundColor3 = get() and C.Green or C.Locked
+		end)
+		label.ZIndex = 14
+	end
+	toggleRow(4, "Music", function() return Sound.musicOn end, Sound.setMusic)
+	toggleRow(58, "Sound effects", function() return Sound.sfxOn end, Sound.setSfx)
+	W.label(settings, "Start a fresh run from Stage 1 (keeps coins and trails)", {
+		Position = UDim2.new(0, 6, 0, 118),
+		Size = UDim2.new(1, -160, 0, 44),
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Font = C.FontBody,
+		TextColor3 = C.SubText,
+		ZIndex = 13,
+	})
+	local restart, restartLabel
+	restart, restartLabel = W.button(settings, "RESTART", C.Red, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -6, 0, 118), Size = UDim2.new(0, 130, 0, 42), ZIndex = 13 }, function()
+		if os.clock() - restartArmed < 3 then
+			restartArmed = 0
+			restartLabel.Text = "RESTART"
+			remotes.Restart:FireServer()
+			UI.close()
+		else
+			restartArmed = os.clock()
+			restartLabel.Text = "SURE?"
+		end
+	end)
+	restartLabel.ZIndex = 14
+	W.label(settings, "CONTROLS\nKeyboard: WASD / arrows to move, Space to jump, Shift for mouse lock, R to respawn\nTouch: thumbstick to move, jump button to jump\nGamepad: left stick to move, A to jump", {
+		Position = UDim2.new(0, 6, 0, 180),
+		Size = UDim2.new(1, -12, 0, 180),
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextYAlignment = Enum.TextYAlignment.Top,
+		Font = C.FontBody,
+		TextColor3 = C.SubText,
+		TextScaled = false,
+		TextSize = 18,
+		ZIndex = 13,
+	})
+
+	-- Win
+	local win = page("Finished", false)
+	W.label(win, "🏆", { Position = UDim2.new(0, 0, 0, 0), Size = UDim2.new(1, 0, 0, 90), ZIndex = 13 })
+	W.label(win, "YOU BEAT " .. Config.GameName .. "!", { Position = UDim2.new(0, 0, 0, 96), Size = UDim2.new(1, 0, 0, 50), TextColor3 = C.Yellow, ZIndex = 13 })
+	W.label(win, "", { Name = "Time", Position = UDim2.new(0, 0, 0, 152), Size = UDim2.new(1, 0, 0, 40), ZIndex = 13 })
+	W.label(win, "", { Name = "Detail", Position = UDim2.new(0, 0, 0, 196), Size = UDim2.new(1, 0, 0, 30), Font = C.FontBody, TextColor3 = C.SubText, ZIndex = 13 })
+	local again, againLabel = W.button(win, "PLAY AGAIN", C.Green, { Position = UDim2.new(0.5, -210, 0, 262), Size = UDim2.new(0, 200, 0, 56), ZIndex = 13 }, function()
+		remotes.Restart:FireServer()
+		UI.close()
+	end)
+	againLabel.ZIndex = 14
+	local keep, keepLabel = W.button(win, "KEEP EXPLORING", C.Blue, { Position = UDim2.new(0.5, 10, 0, 262), Size = UDim2.new(0, 200, 0, 56), ZIndex = 13 }, UI.close)
+	keepLabel.ZIndex = 14
+	local _ = again, keep
+end
+
+function UI.refreshMenus()
+	local maxStage = attr("MaxStage", 1)
+	local stage = attr("Stage", 1)
+	for index, entry in ipairs(stageButtons) do
+		local unlocked = index <= maxStage
+		entry.button.BackgroundColor3 = unlocked and entry.color or C.Locked
+		entry.label.Text = unlocked and ((index == stage) and ("▶ " .. index) or tostring(index)) or "🔒"
+	end
+	local owned = "," .. attr("OwnedTrails", "None") .. ","
+	local equipped = attr("Trail", "None")
+	for _, row in ipairs(trailRows) do
+		local id = row.info.Id
+		if id == equipped then
+			row.label.Text = "EQUIPPED"
+			row.button.BackgroundColor3 = C.Locked
+		elseif string.find(owned, "," .. id .. ",", 1, true) then
+			row.label.Text = "EQUIP"
+			row.button.BackgroundColor3 = C.Blue
+		else
+			row.label.Text = "🪙 " .. row.info.Price
+			row.button.BackgroundColor3 = (attr("Coins", 0) >= row.info.Price) and C.Green or C.Red
+		end
+	end
+end
+
+----------------------------------------------------------------------
+-- Title screen
+----------------------------------------------------------------------
+
+local function buildTitle()
+	blur = Instance.new("BlurEffect")
+	blur.Name = "ObbyTitleBlur"
+	blur.Size = 18
+	blur.Parent = Lighting
+
+	titleScreen = W.frame(gui, {
+		Name = "Title",
+		Size = UDim2.new(1, 0, 1, 0),
+		BackgroundColor3 = Color3.fromRGB(10, 12, 28),
+		BackgroundTransparency = 0.35,
+		Active = true,
+		ZIndex = 30,
+	})
+	local logo = W.label(titleScreen, Config.GameName, {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.new(0.5, 0, 0.3, 0),
+		Size = UDim2.new(0, 820, 0, 150),
+		ZIndex = 31,
+	})
+	W.gradient(logo, C.Yellow, Color3.fromRGB(255, 120, 60))
+	W.label(titleScreen, Config.Tagline, {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.new(0.5, 0, 0.46, 0),
+		Size = UDim2.new(0, 700, 0, 34),
+		TextColor3 = C.SubText,
+		Font = C.FontBody,
+		ZIndex = 31,
+	})
+	local play, playLabel
+	play, playLabel = W.button(titleScreen, "PLAY", C.Green, {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.new(0.5, 0, 0.64, 0),
+		Size = UDim2.new(0, 280, 0, 84),
+		ZIndex = 31,
+	}, function()
+		Util.tween(blur, 0.5, { Size = 0 })
+		Util.tween(titleScreen, 0.4, { BackgroundTransparency = 1 })
+		for _, item in ipairs(titleScreen:GetChildren()) do
+			item.Visible = false
+		end
+		task.delay(0.5, function()
+			titleScreen.Visible = false
+			blur.Enabled = false
+		end)
+		Ambience.unlockMusic()
+		showZone(Config.zoneOf(attr("Stage", 1)))
+	end)
+	playLabel.ZIndex = 32
+	local hintText = "WASD + Space to play"
+	if isTouch() then
+		hintText = "Use the thumbstick and jump button"
+	elseif UserInputService.GamepadEnabled and not UserInputService.KeyboardEnabled then
+		hintText = "Left stick to move, A to jump"
+	end
+	W.label(titleScreen, hintText, {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.new(0.5, 0, 0.8, 0),
+		Size = UDim2.new(0, 600, 0, 26),
+		TextColor3 = C.SubText,
+		Font = C.FontBody,
+		ZIndex = 31,
+	})
+	-- a gentle pulse on the play button
+	task.spawn(function()
+		local scale = play:FindFirstChildOfClass("UIScale")
+		while titleScreen.Visible and scale do
+			Util.tween(scale, 0.7, { Scale = 1.07 }, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+			task.wait(0.7)
+			Util.tween(scale, 0.7, { Scale = 1 }, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+			task.wait(0.7)
+		end
+	end)
+	GuiService.SelectedObject = (UserInputService.GamepadEnabled and not UserInputService.KeyboardEnabled) and play or nil
+end
+
+----------------------------------------------------------------------
+-- State updates
+----------------------------------------------------------------------
+
+local function refreshStage()
+	local stage = attr("Stage", 1)
+	local shown = math.min(stage, Config.StageCount)
+	local info = Config.Stages[shown]
+	local zone = Config.Zones[Config.zoneOf(stage)]
+	if stage >= Config.FinishIndex then
+		stageTitle.Text = "FINISHED!"
+		stageName.Text = "You beat every stage"
+		stageBadge.Number.Text = "🏁"
+	else
+		stageTitle.Text = "STAGE " .. shown .. " / " .. Config.StageCount
+		stageName.Text = info.Name .. "  ·  " .. zone.Name
+		stageBadge.Number.Text = tostring(shown)
+	end
+	stageBadge.BackgroundColor3 = zone.Color
+	progressFill.BackgroundColor3 = zone.Color
+	Util.tween(progressFill, 0.5, { Size = UDim2.new((stage - 1) / Config.StageCount, 0, 1, 0) })
+	UI.refreshMenus()
+end
+
+local function refreshCoins()
+	coinLabel.Text = Util.formatNumber(attr("Coins", 0))
+	if openPage then
+		UI.refreshMenus()
+	end
+end
+
+local function tick()
+	-- timer
+	if attr("Finished", false) then
+		timerLabel.Text = Util.formatTime(attr("RunTime", 0))
+		timerLabel.TextColor3 = C.Yellow
+	else
+		timerLabel.Text = Util.formatTime(workspace:GetServerTimeNow() - attr("RunStart", workspace:GetServerTimeNow()))
+		timerLabel.TextColor3 = C.Text
+	end
+	-- power-up tray
+	local clock = os.clock()
+	for kind, entry in pairs(trayTiles) do
+		local active = Powers.active[kind]
+		if active and active.expires > clock then
+			local left = active.expires - clock
+			entry.tile.Visible = true
+			entry.fill.Size = UDim2.new(math.clamp(left / active.duration, 0, 1), 0, 1, 0)
+			-- blink when nearly out
+			entry.tile.BackgroundTransparency = (left < 2 and math.floor(clock * 8) % 2 == 0) and 0.5 or 0.05
+		else
+			entry.tile.Visible = false
+		end
+	end
+end
+
+local function onNotify(kind, data)
+	if kind == "Checkpoint" then
+		if data.New then
+			UI.toast("CHECKPOINT!  +" .. data.Reward .. " 🪙", C.Green)
+			Sound.play("Checkpoint")
+			Bus.fire("CheckpointFx")
+		end
+	elseif kind == "Win" then
+		Sound.play("Win")
+		Sound.play("Fanfare")
+		Bus.fire("WinFx")
+		local page = pages.Finished
+		page.Time.Text = "Time  " .. Util.formatTime(data.Time)
+		page.Detail.Text = (data.Best and "New personal best!  " or "") .. "+" .. data.Reward .. " coins"
+		UI.toggle("Finished")
+	elseif kind == "Shop" then
+		if data.Ok then
+			UI.toast("Trail unlocked!", C.Pink)
+		else
+			UI.toast("Not enough coins!", C.Red)
+		end
+	end
+end
+
+local function bind(name, callback, ...)
+	ContextActionService:BindAction(name, function(_, state)
+		if state == Enum.UserInputState.Begin and not titleScreen.Visible then
+			callback()
+		end
+		return Enum.ContextActionResult.Pass
+	end, false, ...)
+end
+
+function UI.start()
+	remotes = ReplicatedStorage:WaitForChild("Remotes")
+	gui = make("ScreenGui", {
+		Name = "ObbyHUD",
+		ResetOnSpawn = false,
+		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+		DisplayOrder = 5,
+	}, nil)
+	rootScale = make("UIScale", { Scale = 1 }, gui)
+
+	buildStagePill()
+	buildStats()
+	buildSideButtons()
+	buildTray()
+	buildToast()
+	buildModal()
+	buildTitle()
+	gui.Parent = player:WaitForChild("PlayerGui")
+
+	rescale()
+	refreshHints()
+	local camera = workspace.CurrentCamera
+	if camera then
+		camera:GetPropertyChangedSignal("ViewportSize"):Connect(rescale)
+	end
+	UserInputService.LastInputTypeChanged:Connect(function()
+		rescale()
+		refreshHints()
+	end)
+
+	for _, name in ipairs({ "Stage", "MaxStage", "Trail", "OwnedTrails" }) do
+		player:GetAttributeChangedSignal(name):Connect(refreshStage)
+	end
+	player:GetAttributeChangedSignal("Coins"):Connect(refreshCoins)
+	refreshStage()
+	refreshCoins()
+
+	remotes.Notify.OnClientEvent:Connect(onNotify)
+	Bus.on("ZoneEntered", showZone)
+	Bus.on("Death", function()
+		flash.BackgroundTransparency = 0.45
+		Util.tween(flash, 0.6, { BackgroundTransparency = 1 })
+	end)
+	Bus.on("PowerGot", function(kind)
+		local cfg = Config.PowerUps[kind]
+		UI.toast(cfg.Icon .. " " .. cfg.Name .. "!  " .. cfg.Desc, cfg.Color)
+	end)
+
+	bind("ObbyReset", Touch.reset, Enum.KeyCode.R, Enum.KeyCode.DPadDown)
+	bind("ObbyStages", function() UI.toggle("Stages") end, Enum.KeyCode.M, Enum.KeyCode.DPadUp)
+	bind("ObbyTrails", function() UI.toggle("Trails") end, Enum.KeyCode.T, Enum.KeyCode.DPadLeft)
+	bind("ObbySettings", function() UI.toggle("Settings") end, Enum.KeyCode.P, Enum.KeyCode.DPadRight)
+
+	local elapsed = 0
+	RunService.Heartbeat:Connect(function(dt)
+		elapsed = elapsed + dt
+		if elapsed >= 0.05 then
+			elapsed = 0
+			tick()
+		end
+	end)
+end
+
+return UI
+]]></ProtectedString></Properties><Item class="ModuleScript" referent="RBX30"><Properties><string name="Name">Widgets</string><ProtectedString name="Source"><![CDATA[-- Widgets: small factory functions that give every piece of UI the same look.
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Config = require(Shared:WaitForChild("Config"))
+local Util = require(Shared:WaitForChild("Util"))
+local Bus = require(script.Parent.Parent.Bus)
+
+local Widgets = {}
+
+local C = Config.UI
+local make = Util.make
+
+function Widgets.corner(parent, radius)
+	return make("UICorner", { CornerRadius = UDim.new(0, radius or 12) }, parent)
+end
+
+function Widgets.stroke(parent, thickness, color, transparency)
+	return make("UIStroke", {
+		Thickness = thickness or 3,
+		Color = color or C.Stroke,
+		Transparency = transparency or 0,
+		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+	}, parent)
+end
+
+function Widgets.gradient(parent, top, bottom, rotation)
+	return make("UIGradient", { Color = ColorSequence.new(top, bottom), Rotation = rotation or 90 }, parent)
+end
+
+function Widgets.frame(parent, props)
+	local frame = make("Frame", {
+		BackgroundColor3 = C.Panel,
+		BorderSizePixel = 0,
+	}, nil)
+	for key, value in pairs(props or {}) do
+		frame[key] = value
+	end
+	frame.Parent = parent
+	return frame
+end
+
+-- A rounded dark panel with an outline.
+function Widgets.panel(parent, props, radius)
+	local frame = Widgets.frame(parent, props)
+	Widgets.corner(frame, radius or 16)
+	Widgets.stroke(frame, 3)
+	return frame
+end
+
+function Widgets.label(parent, text, props)
+	local label = make("TextLabel", {
+		BackgroundTransparency = 1,
+		Size = UDim2.new(1, 0, 1, 0),
+		Text = text,
+		Font = C.Font,
+		TextColor3 = C.Text,
+		TextScaled = true,
+		TextWrapped = true,
+	}, nil)
+	for key, value in pairs(props or {}) do
+		label[key] = value
+	end
+	label.Parent = parent
+	-- an outline keeps text readable over any background
+	make("UIStroke", { Thickness = 2, Color = C.Stroke, Transparency = 0.15 }, label)
+	return label
+end
+
+--[[
+	A chunky button that grows on hover, squashes on press and clicks.
+	Works the same for mouse, touch and gamepad (Activated covers all three).
+]]
+function Widgets.button(parent, text, color, props, onClick)
+	local button = make("TextButton", {
+		AutoButtonColor = false,
+		BackgroundColor3 = color or C.Blue,
+		BorderSizePixel = 0,
+		Text = "",
+		Size = UDim2.new(0, 160, 0, 48),
+	}, nil)
+	for key, value in pairs(props or {}) do
+		button[key] = value
+	end
+	button.Parent = parent
+	Widgets.corner(button, 14)
+	Widgets.stroke(button, 3)
+	Widgets.gradient(button, Color3.new(1, 1, 1), Color3.fromRGB(190, 190, 205))
+	local scale = make("UIScale", { Scale = 1 }, button)
+	local label = Widgets.label(button, text, {
+		Name = "Label",
+		Position = UDim2.new(0.08, 0, 0.14, 0),
+		Size = UDim2.new(0.84, 0, 0.72, 0),
+	})
+	button.MouseEnter:Connect(function()
+		Util.tween(scale, 0.12, { Scale = 1.06 })
+		Bus.fire("Sfx", "Hover")
+	end)
+	button.MouseLeave:Connect(function()
+		Util.tween(scale, 0.12, { Scale = 1 })
+	end)
+	button.MouseButton1Down:Connect(function()
+		Util.tween(scale, 0.06, { Scale = 0.94 })
+	end)
+	button.MouseButton1Up:Connect(function()
+		Util.tween(scale, 0.1, { Scale = 1 })
+	end)
+	button.Activated:Connect(function()
+		Bus.fire("Sfx", "Click")
+		if onClick then
+			onClick()
+		end
+	end)
+	return button, label
+end
+
+-- Pop an element in with a springy scale.
+function Widgets.pop(guiObject)
+	local scale = guiObject:FindFirstChildOfClass("UIScale") or make("UIScale", { Scale = 1 }, guiObject)
+	scale.Scale = 0.6
+	Util.tween(scale, 0.35, { Scale = 1 }, Enum.EasingStyle.Back)
+end
+
+return Widgets
+]]></ProtectedString></Properties></Item>
+</Item>
+<Item class="ModuleScript" referent="RBX32"><Properties><string name="Name">World</string><ProtectedString name="Source"><![CDATA[--[[
+	World (client)
+	Animates everything the server tagged: sliding platforms, spinners,
+	blinking lasers, crumbling tiles, coins and power-up orbs. Positions are
+	a pure function of the shared server clock, so every player sees the same
+	thing, and each platform is given a matching velocity so that it carries
+	whoever is standing on it.
+]]
+
+local CollectionService = game:GetService("CollectionService")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local Bus = require(script.Parent.Bus)
+
+local World = {}
+
+local player = Players.LocalPlayer
+local TAU = math.pi * 2
+local RANGE = 420 -- only animate things this close to the camera
+local ZERO = Vector3.new(0, 0, 0)
+
+local movers = {}
+local rotors = {}
+local blinkers = {}
+local coins = {}
+local orbs = {}
+local lamps = {}
+local vanishing = {}
+local hiddenCoins = {}
+
+----------------------------------------------------------------------
+-- Easing: u is 0..1 through one full there-and-back cycle. Returns the
+-- position 0..1 and its rate of change per unit u.
+----------------------------------------------------------------------
+local function ease(kind, u)
+	if kind == "linear" then
+		if u < 0.5 then
+			return u * 2, 2
+		end
+		return 2 - u * 2, -2
+	elseif kind == "hold" then
+		local h = 0.15
+		local span = 0.5 - h
+		if u < h then
+			return 0, 0
+		elseif u < 0.5 then
+			local s = (u - h) / span
+			return s * s * (3 - 2 * s), 6 * s * (1 - s) / span
+		elseif u < 0.5 + h then
+			return 1, 0
+		end
+		local s = (u - 0.5 - h) / span
+		return 1 - s * s * (3 - 2 * s), -6 * s * (1 - s) / span
+	elseif kind == "slam" then
+		if u < 0.45 then
+			return 0, 0
+		elseif u < 0.53 then
+			local s = (u - 0.45) / 0.08
+			return s * s, 2 * s / 0.08
+		elseif u < 0.68 then
+			return 1, 0
+		end
+		local s = (u - 0.68) / 0.32
+		return 1 - s * s * (3 - 2 * s), -6 * s * (1 - s) / 0.32
+	elseif kind == "loop" then
+		return u, 1
+	end
+	return 0.5 - 0.5 * math.cos(TAU * u), math.pi * math.sin(TAU * u)
+end
+
+----------------------------------------------------------------------
+-- Registration
+----------------------------------------------------------------------
+
+local function watch(tagName, list, build)
+	local function add(part)
+		if not part:IsA("BasePart") then
+			return
+		end
+		local ok, entry = pcall(build, part)
+		if ok and entry then
+			entry.part = part
+			list[part] = entry
+		end
+	end
+	CollectionService:GetInstanceAddedSignal(tagName):Connect(add)
+	CollectionService:GetInstanceRemovedSignal(tagName):Connect(function(part)
+		list[part] = nil
+	end)
+	for _, part in ipairs(CollectionService:GetTagged(tagName)) do
+		add(part)
+	end
+end
+
+local function buildMover(part)
+	local p0, p1 = part:GetAttribute("P0"), part:GetAttribute("P1")
+	if not p0 or not p1 then
+		return nil
+	end
+	return {
+		p0 = p0,
+		delta = p1 - p0,
+		period = part:GetAttribute("Period") or 4,
+		phase = part:GetAttribute("Phase") or 0,
+		ease = part:GetAttribute("Ease") or "sine",
+		rot = part.CFrame - part.CFrame.Position,
+		anchor = p0,
+	}
+end
+
+local function buildRotor(part)
+	local pivot, axis = part:GetAttribute("Pivot"), part:GetAttribute("Axis")
+	if not pivot or not axis then
+		return nil
+	end
+	local base = part.CFrame
+	return {
+		pivot = pivot,
+		axis = axis,
+		speed = part:GetAttribute("Speed") or 1,
+		swing = part:GetAttribute("Swing"),
+		period = part:GetAttribute("Period") or 3,
+		phase = part:GetAttribute("Phase") or 0,
+		upright = part:GetAttribute("Upright") == true,
+		rel = CFrame.new(-pivot) * base,
+		rot = base - base.Position,
+		anchor = pivot,
+	}
+end
+
+local function buildBlinker(part)
+	return {
+		on = part:GetAttribute("On") or 1,
+		off = part:GetAttribute("Off") or 1,
+		phase = part:GetAttribute("Phase") or 0,
+		solid = part:GetAttribute("Solid") == true,
+		alpha = part.Transparency,
+		state = "",
+		anchor = part.Position,
+	}
+end
+
+local function buildSpinner(part)
+	return { base = part.CFrame, anchor = part.Position, id = part:GetAttribute("Id") or 0, alpha = part.Transparency }
+end
+
+----------------------------------------------------------------------
+-- Per-frame animation
+----------------------------------------------------------------------
+
+local function step()
+	local t = workspace:GetServerTimeNow()
+	local camera = workspace.CurrentCamera
+	local eye = camera and camera.CFrame.Position or ZERO
+
+	for part, m in pairs(movers) do
+		if (m.anchor - eye).Magnitude < RANGE then
+			local a, rate = ease(m.ease, (t / m.period + m.phase) % 1)
+			part.CFrame = CFrame.new(m.p0 + m.delta * a) * m.rot
+			part.AssemblyLinearVelocity = m.delta * (rate / m.period)
+		end
+	end
+
+	for part, r in pairs(rotors) do
+		if (r.anchor - eye).Magnitude < RANGE then
+			local angle, omega
+			if r.swing then
+				local w = TAU * (t / r.period + r.phase)
+				angle = r.swing * math.sin(w)
+				omega = r.swing * TAU / r.period * math.cos(w)
+			else
+				angle = (r.speed * t + r.phase * TAU) % TAU
+				omega = r.speed
+			end
+			local turned = CFrame.new(r.pivot) * CFrame.fromAxisAngle(r.axis, angle) * r.rel
+			local spin = r.axis * omega
+			if r.upright then
+				part.CFrame = CFrame.new(turned.Position) * r.rot
+				part.AssemblyAngularVelocity = ZERO
+			else
+				part.CFrame = turned
+				part.AssemblyAngularVelocity = spin
+			end
+			part.AssemblyLinearVelocity = spin:Cross(turned.Position - r.pivot)
+		end
+	end
+
+	for part, b in pairs(blinkers) do
+		if (b.anchor - eye).Magnitude < RANGE then
+			local cycle = b.on + b.off
+			local u = (t + b.phase * cycle) % cycle
+			local state
+			if b.solid then
+				-- platform: warn before it disappears
+				if u < b.on - 0.6 then
+					state = "on"
+				elseif u < b.on then
+					state = "warn"
+				else
+					state = "off"
+				end
+			else
+				-- hazard: warn before it switches on
+				if u < b.on then
+					state = "on"
+				elseif u > cycle - 0.5 then
+					state = "warn"
+				else
+					state = "off"
+				end
+			end
+			if state == "warn" then
+				local flicker = (math.floor(t * 14) % 2 == 0)
+				if b.solid then
+					part.Transparency = flicker and 0.55 or b.alpha
+				else
+					part.Transparency = flicker and 0.6 or 0.9
+				end
+			end
+			if state ~= b.state then
+				b.state = state
+				if b.solid then
+					part.CanCollide = state ~= "off"
+					part.Transparency = (state == "off") and 0.88 or b.alpha
+				else
+					part.CanQuery = state == "on"
+					part.Transparency = (state == "on") and b.alpha or ((state == "off") and 1 or 0.9)
+				end
+			end
+		end
+	end
+
+	for part, c in pairs(coins) do
+		if not hiddenCoins[c.id] and (c.anchor - eye).Magnitude < 220 then
+			part.CFrame = c.base * CFrame.Angles(0, t * 2.4 + c.id, 0) + Vector3.new(0, math.sin(t * 2 + c.id) * 0.25, 0)
+		end
+	end
+
+	for part, o in pairs(orbs) do
+		if not o.pad and (o.anchor - eye).Magnitude < 220 then
+			part.CFrame = o.base + Vector3.new(0, math.sin(t * 2.2 + o.id) * 0.4, 0)
+		end
+	end
+end
+
+----------------------------------------------------------------------
+-- Things other modules trigger
+----------------------------------------------------------------------
+
+-- A crumbling tile: wobble, drop out, come back.
+function World.vanish(part)
+	if vanishing[part] then
+		return
+	end
+	vanishing[part] = true
+	Bus.fire("Sfx", "Crumble")
+	task.spawn(function()
+		local delayTime = part:GetAttribute("Delay") or 0.6
+		local respawn = part:GetAttribute("Respawn") or 3
+		local color = part.Color
+		local started = os.clock()
+		while os.clock() - started < delayTime do
+			part.Color = (math.floor(os.clock() * 16) % 2 == 0) and Color3.fromRGB(255, 90, 70) or color
+			task.wait()
+		end
+		part.Color = color
+		part.CanCollide = false
+		part.Transparency = 1
+		task.wait(respawn)
+		part.Transparency = 0.5
+		task.wait(0.25)
+		part.Transparency = 0
+		part.CanCollide = true
+		vanishing[part] = nil
+	end)
+end
+
+-- Hide a power-up orb for a while after it is collected.
+function World.hideOrb(part, seconds)
+	local o = orbs[part]
+	if not o or o.pad then
+		return
+	end
+	part.Transparency = 1
+	part.CanQuery = false
+	local gui = part:FindFirstChildOfClass("BillboardGui")
+	if gui then
+		gui.Enabled = false
+	end
+	task.delay(seconds, function()
+		part.Transparency = o.alpha
+		part.CanQuery = true
+		if gui then
+			gui.Enabled = true
+		end
+	end)
+end
+
+local function refreshCoins()
+	local mask = player:GetAttribute("CoinMask") or ""
+	hiddenCoins = {}
+	for i = 1, #mask do
+		if string.sub(mask, i, i) == "1" then
+			hiddenCoins[i] = true
+		end
+	end
+	for part, c in pairs(coins) do
+		local hidden = hiddenCoins[c.id] == true
+		part.Transparency = hidden and 1 or 0
+		part.CanQuery = not hidden
+	end
+end
+
+function World.hideCoin(part)
+	local c = coins[part]
+	if c then
+		hiddenCoins[c.id] = true
+		part.Transparency = 1
+		part.CanQuery = false
+	end
+end
+
+local function refreshLamps()
+	local reached = player:GetAttribute("MaxStage") or 1
+	local stage = player:GetAttribute("Stage") or 1
+	for part, lamp in pairs(lamps) do
+		if lamp.stage == stage then
+			part.Color = Color3.fromRGB(90, 255, 140)
+		elseif lamp.stage <= reached then
+			part.Color = Color3.fromRGB(60, 190, 110)
+		else
+			part.Color = Color3.fromRGB(255, 255, 255)
+		end
+	end
+end
+
+function World.start()
+	watch("Mover", movers, buildMover)
+	watch("Rotor", rotors, buildRotor)
+	watch("Blinker", blinkers, buildBlinker)
+	watch("Coin", coins, function(part)
+		local entry = buildSpinner(part)
+		task.defer(refreshCoins)
+		return entry
+	end)
+	watch("PowerUp", orbs, function(part)
+		local entry = buildSpinner(part)
+		entry.pad = part:GetAttribute("Pad") == true
+		return entry
+	end)
+	watch("CheckpointLight", lamps, function(part)
+		task.defer(refreshLamps)
+		return { stage = part:GetAttribute("Stage") or 0 }
+	end)
+	watch("Conveyor", {}, function(part)
+		local velocity = part:GetAttribute("Velocity")
+		if velocity then
+			part.AssemblyLinearVelocity = velocity
+		end
+		return nil
+	end)
+
+	player:GetAttributeChangedSignal("CoinMask"):Connect(refreshCoins)
+	player:GetAttributeChangedSignal("Stage"):Connect(refreshLamps)
+	player:GetAttributeChangedSignal("MaxStage"):Connect(refreshLamps)
+	refreshCoins()
+	refreshLamps()
+
+	RunService.Stepped:Connect(step)
+end
+
+return World
+]]></ProtectedString></Properties></Item>
+</Item>
+</Item>
+</Item>
+</roblox>
